@@ -11,7 +11,6 @@ import { MatInputModule } from "@angular/material/input";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { FormsModule } from "@angular/forms";
 import {MatListModule} from '@angular/material/list';
-import {MatCardModule} from '@angular/material';
 import { DropComponent } from './drop/drop.component';
 import { DragDropModule } from "@angular/cdk/drag-drop";
 
@@ -29,7 +28,6 @@ import { DragDropModule } from "@angular/cdk/drag-drop";
     MatFormFieldModule,
     FormsModule,
     MatListModule,
-    MatCardModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

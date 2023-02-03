@@ -33,6 +33,14 @@
             "scripts": []
           },
           "configurations": {
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -64,11 +72,15 @@
           }
         },
         "serve": {
+          "defaultConfiguration": "development",
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "chess:build"
           },
           "configurations": {
+            "development": {
+              "browserTarget": "chess:build:development"
+            },
             "production": {
               "browserTarget": "chess:build:production"
             }
@@ -111,7 +123,6 @@
         }
       }
     }},
-  "defaultProject": "chess",
   "cli": {
     "analytics": false
   }
