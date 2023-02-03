@@ -171,49 +171,12 @@ export class ChessComponent {
 	private turnHistory: Turn[];
 
 	constructor() {
-		this.initBoardState();
+		this.initBoard();
 		this.initLetters();
-		// this.constructNewBoard();
 		this.setDefaults();
 	}
 
 	// Setup Methods
-	// private constructNewBoard(): void {
-	// 	let darkTile = false;
-	// 	let i = 0;
-
-	// 	for (let y = 7; y >= 0; y--) {
-	// 		for (let x = 0; x < 8; x++) {
-	// 			let value = this.boardState[i];
-	// 			let defaultPiece = this.pieces.find(
-	// 				(piece) => piece.value === value
-	// 			);
-	// 			let key = i;
-
-	// 			if (x !== 0) {
-	// 				darkTile = !darkTile;
-	// 			}
-
-	// 			let piece: Piece = {
-	// 				key: key,
-	// 				name: defaultPiece.name,
-	// 				abbr: defaultPiece.abbr,
-	// 				value: defaultPiece.value,
-	// 				player: defaultPiece.player,
-	// 			};
-	// 			let tile: Tile = this.createNullTile(key);
-	// 			tile.piece = piece;
-	// 			tile.color = darkTile;
-	// 			tile.x = x;
-	// 			tile.y = y;
-				
-	// 			this.board.push(tile);
-	// 			console.log(`{key:${key},piece:{key:${key},name:"${defaultPiece.name}",abbr:"${defaultPiece.abbr}",value:${defaultPiece.value},player:"${defaultPiece.player}"},color:${darkTile},x:${x},y:${y},selected:false,enpassantable:false,moveable:false}`);
-
-	// 			i++;
-	// 		}
-	// 	}
-	// }
 	private setDefaults(): void {
 		// Variables
 		this.storedTile = this.createNullTile(null);
@@ -241,17 +204,7 @@ export class ChessComponent {
 	}
 
 	// Initialize Methods
-	private initBoardState(): void {
-		// this.boardState = [
-		// 	10,9, 8, 11,12,8, 9,10, 
-		// 	7, 7, 7, 7, 7, 7, 7, 7, 
-		// 	0, 0, 0, 0, 0, 0, 0, 0, 
-		// 	0, 0, 0, 0, 0, 0, 0, 0, 
-		// 	0, 0, 0, 0, 0, 0, 0, 0, 
-		// 	0, 0, 0, 0, 0, 0, 0, 0, 
-		// 	1, 1, 1, 1, 1, 1, 1, 1, 
-		// 	4, 3, 2, 6, 5, 2, 3, 4,
-		// ];
+	private initBoard(): void {
 		this.board = [
 		{key:0,piece:{key:0,name:"rook",abbr:"r",value:10,player:"b"},color:false,x:0,y:7,selected:false,enpassantable:false,moveable:false},
 		{key:1,piece:{key:1,name:"knight",abbr:"n",value:9,player:"b"},color:true,x:1,y:7,selected:false,enpassantable:false,moveable:false},
