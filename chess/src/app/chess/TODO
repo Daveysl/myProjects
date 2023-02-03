@@ -1,6 +1,17 @@
 BUGS
-- enpasanting pawn that did not move twice last turn
+- when piece is clicked, it highlights moves. When the same piece is clicked again, the highlights should disappear. When it is clicked a third time, the moves should highlight again.
 
 
 FEATURES
-- drag and drop
+- simplify board creation 
+
+
+
+
+
+DEBUG
+////////////////////////////////////////
+
+
+
+

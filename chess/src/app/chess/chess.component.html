@@ -9,21 +9,22 @@
         class="tile"
         *ngFor="let tile of board"
         [ngClass]="{ tile__darkMovable: tile.color && tile.moveable, tile__dark: tile.color, tile__moveable: tile.moveable}"
-        (mouseup)="pieceClicked($event, tile.key)"
+        (mousedown)="pieceClicked($event, tile.key)"
         cdkDropList
+        cdkDropListSortingDisabled
 				(cdkDropListDropped)="pieceDropped(tile)"
 				[cdkDropListData]="tile"
       >
         <!-- <div [ngClass]="{ moveable: tile.moveable }"></div> -->
+        
+        <!-- piece -->
         <div
 					class="piece_placeholder"
-					*ngIf="tile.piece.value !== 0"
-					cdkDrag
+					*ngIf="tile.piece.value !== 0; else elseBlock"
           (cdkDragStarted)="piecePickedUp($event, tile)"
-          [cdkDragData]="tile" 
-          
-				>
-        <div *cdkDragPlaceholder style="display: none"></div>
+          [cdkDragData]="tile"
+          [cdkDragDisabled]="tile.piece.player !== currentPlayer"
+          cdkDrag> <span *cdkDragPlaceholder style="display: none"></span>
 					<img
 						class="piece"
 						[ngClass]="{ selected: tile.selected }"
@@ -36,6 +37,8 @@
             draggable="false"
 					/>
 				</div>
+
+
       </div>
     </div>
   </section>
