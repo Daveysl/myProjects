@@ -1,18 +1,120 @@
-<section class="container">
-    <div class="board">
-        <div class="tile" *ngFor="let tile of board" [ngClass]="{'tile__dark': tile.color}" (click)="pieceClicked(tile.key)"> 
-            <!-- {{ getLetter(tile.x) }}{{ tile.y +1 }} -->
-            
-            <div [ngClass]="{'moveable': tile.moveable}"></div>
-            <img
-                *ngIf="tile.piece.value !== 0" 
-                class="piece" [ngClass]="{'selected': tile.selected}"
-                src="../../assets/{{tile.piece.name + tile.piece.player}}.svg" 
-                alt="{{tile.piece.name + tile.piece.player}}" 
-                draggable="false"
-            >
-            
-            
-        </div>
+<div class="background"></div>
+
+<!-- <div class="header"><h1>Chess</h1></div> -->
+<div id="container">
+  <section id="chess" [style.width.px]="boardSize" [style.height.px]="boardSize">
+    <h1>Chess</h1>
+    <div class="board" cdkDropListGroup>
+      <div
+        class="tile"
+        *ngFor="let tile of board"
+        [ngClass]="{ tile__darkMovable: tile.color && tile.moveable, tile__dark: tile.color, tile__moveable: tile.moveable}"
+        (mouseup)="pieceClicked($event, tile.key)"
+        cdkDropList
+				(cdkDropListDropped)="pieceDropped(tile)"
+				[cdkDropListData]="tile"
+      >
+        <!-- <div [ngClass]="{ moveable: tile.moveable }"></div> -->
+        <div
+					class="piece_placeholder"
+					*ngIf="tile.piece.value !== 0"
+					cdkDrag
+          (cdkDragStarted)="piecePickedUp($event, tile)"
+          [cdkDragData]="tile" 
+          
+				>
+        <div *cdkDragPlaceholder style="display: none"></div>
+					<img
+						class="piece"
+						[ngClass]="{ selected: tile.selected }"
+						src="../../assets/{{ this.options.pieceSet }}/{{
+							tile.piece.player + tile.piece.abbr.toUpperCase()
+						}}.svg"
+						alt="{{
+							tile.piece.player + tile.piece.abbr.toUpperCase()
+						}}"
+            draggable="false"
+					/>
+				</div>
+      </div>
     </div>
-</section>
+  </section>
+  <div class="coords__numbers">
+    <div class="letter" *ngFor="let letter of letters; let i = index">{{i+1}}</div>
+  </div>
+  
+  <section id="sidebar" [style.height.px]="boardSize">
+    <h1>Moves</h1>
+    <div class="history">
+      <ul>
+        <li *ngFor="let turn of turnHistory" role="listitem">
+          <div>{{ turn.num + "." }}</div>
+          <div [ngClass]="{current__move: turn.white.current}" (click)="getPast(turn.white)">
+            {{ turn.white.notation }}
+          </div>
+          <div [ngClass]="{current__move: turn.black.current}" (click)="getPast(turn.black)" *ngIf="turn.black.notation !== '' ">
+            {{ turn.black.notation }}
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="coords__letters" [style.width.px]="boardSize">
+    <div class="letter" *ngFor="let letter of letters">{{letter}}</div>
+  </div>
+
+  <section id="settings" [style.width.px]="boardSize">
+    <h1>Chess Settings</h1>
+    <div class="tabs">
+      <button
+        class="tab"
+        [ngClass]="{ tab__active: options.display === option }"
+        *ngFor="let option of optionsList"
+        [style.width.%]="100 / optionsList.length"
+        (click)="openTab(option)"
+      >
+        {{ option }}
+      </button>
+    </div>
+    <!-- TODO: Make each option div into a text string for a displayList -->
+    <div class="tab_display" *ngIf="options.display === 'Piece Set'">
+      <div class="carosel">
+        <button
+          class="theme"
+          *ngFor="let theme of options.pieceSetList"
+          (click)="changeSet(theme)"
+          [ngClass]="{ theme__selected: options.pieceSet === theme }"
+        >
+          <img
+            title="{{ theme }}"
+            src="../../assets/{{ theme }}/wN.svg"
+            alt="{{ theme }}"
+          />
+        </button>
+      </div>
+    </div>
+
+    <div class="tab_display" *ngIf="options.display === 'FEN'">
+      <form>
+        <fieldset class="exportFen" apperance="fill">
+          <label for="fen">FEN</label>
+          <input
+            class="fenInput"
+            name="fen"
+            #input
+            [ngModel]="options.fenValue"
+            (keyup.enter)="onFenValueChange(input.value)"
+          />
+        </fieldset>
+      </form>
+    </div>
+
+  </section>
+  <section id="controls">
+    <h1>Controls</h1>
+    <div class="controls">
+      <button (click)="setDefaults()">Reset</button>
+    </div>
+  </section>
+</div>

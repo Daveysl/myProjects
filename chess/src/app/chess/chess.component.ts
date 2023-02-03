@@ -1,385 +1,981 @@
 /**
  * Made by Sam Davey
- * 
- * 
+ *
+ *
  */
 
-
-import { Component } from '@angular/core';
-import { Piece, Tile } from './chess.model'
+import { Component } from "@angular/core";
+import {
+	Piece,
+	Tile,
+	ChessOptions,
+	Castling,
+	Move,
+	Turn,
+	ValidationData,
+} from "./chess.model";
+import { CdkDrag, CdkDragDrop } from "@angular/cdk/drag-drop";
+import { Title } from "@angular/platform-browser";
 
 @Component({
-  selector: 'app-chess',
-  templateUrl: './chess.component.html',
-  styleUrls: ['./chess.component.scss']
+	selector: "app-chess",
+	templateUrl: "./chess.component.html",
+	styleUrls: ["./chess.component.scss"],
 })
 export class ChessComponent {
-  
-  public board:Tile[] = [];
-  public pieces: Piece[] = [
-    {
-      key: null, // ID of tile
-      name: "", // name of piece
-      abbr: "", // abbreviation of name
-      value: 0, // numeric ID of piece
-      player: "", // name of player
-    },
-    {
-      key: null,
-      name: "pawn",
-      abbr: "",
-      value: 1,
-      player: "white"
-    },
-    {
-      key: null,
-      name: "bishop",
-      abbr: "B",
-      value: 2,
-      player: "white"
-    },
-    {
-      key: null,
-      name: "knight",
-      abbr: "N",
-      value: 3,
-      player: "white"
-    },
-    {
-      key: null,
-      name: "rook",
-      abbr: "R",
-      value: 4,
-      player: "white"
-    },
-    {
-      key: null,
-      name: "king",
-      abbr: "K",
-      value: 5,
-      player: "white"
-    },
-    {
-      key: null,
-      name: "queen",
-      abbr: "Q",
-      value: 6,
-      player: "white"
-    },
-    {
-      key: null,
-      name: "pawn",
-      abbr: "",
-      value: 7,
-      player: "black"
-    },
-    {
-      key: null,
-      name: "bishop",
-      abbr: "B",
-      value: 8,
-      player: "black"
-    },
-    {
-      key: null,
-      name: "knight",
-      abbr: "N",
-      value: 9,
-      player: "black"
-    },
-    {
-      key: null,
-      name: "rook",
-      abbr: "R",
-      value: 10,
-      player: "black"
-    },
-    {
-      key: null,
-      name: "queen",
-      abbr: "Q",
-      value: 11,
-      player: "black"
-    },
-    {
-      key: null, 
-      name: "king",
-      abbr: "K",
-      value: 12,
-      player: "black"
-    }
-  ]
-  private letters: string[] = ["a","b","c","d","e","f","g","h"]
+	public pieces: Piece[] = [
+		{
+			key: null, // ID of tile
+			name: "", // name of piece
+			abbr: "", // abbreviation of name
+			value: 0, // numeric ID of piece
+			player: "", // name of player
+		},
+		{
+			key: null,
+			name: "pawn",
+			abbr: "P",
+			value: 1,
+			player: "w",
+		},
+		{
+			key: null,
+			name: "bishop",
+			abbr: "B",
+			value: 2,
+			player: "w",
+		},
+		{
+			key: null,
+			name: "knight",
+			abbr: "N",
+			value: 3,
+			player: "w",
+		},
+		{
+			key: null,
+			name: "rook",
+			abbr: "R",
+			value: 4,
+			player: "w",
+		},
+		{
+			key: null,
+			name: "king",
+			abbr: "K",
+			value: 5,
+			player: "w",
+		},
+		{
+			key: null,
+			name: "queen",
+			abbr: "Q",
+			value: 6,
+			player: "w",
+		},
+		{
+			key: null,
+			name: "pawn",
+			abbr: "p",
+			value: 7,
+			player: "b",
+		},
+		{
+			key: null,
+			name: "bishop",
+			abbr: "b",
+			value: 8,
+			player: "b",
+		},
+		{
+			key: null,
+			name: "knight",
+			abbr: "n",
+			value: 9,
+			player: "b",
+		},
+		{
+			key: null,
+			name: "rook",
+			abbr: "r",
+			value: 10,
+			player: "b",
+		},
+		{
+			key: null,
+			name: "queen",
+			abbr: "q",
+			value: 11,
+			player: "b",
+		},
+		{
+			key: null,
+			name: "king",
+			abbr: "k",
+			value: 12,
+			player: "b",
+		},
+	];
+	// used in the options object
+	public DEFAULT_FEN: string =
+		"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+	public DEFAULT_PIECESET: string = "cburnett";
+	public DEFAULT_DISPLAY: string = "Piece Set";
 
-  public storedPiece: Piece;
-  public turn: string;
-  private stage:string;
-  private castling: boolean;
+	public DEFAULT_THEMES: string[] = [
+		"theme1",
+		"theme2",
+		"alpha",
+		"california",
+		"cardinal",
+		"cburnett",
+		"chess7",
+		"chessnut",
+		"companion",
+		"dubrovny",
+		"fantasy",
+		"fresca",
+		"gioco",
+		"governor",
+		"horsey",
+		"icpieces",
+		"kosal",
+		"leipzig",
+		"letter",
+		"libra",
+		"maestro",
+		"merida",
+		"pirouetti",
+		"pixel",
+		"reillycraig",
+		"riohacha",
+		"shapes",
+		"spatial",
+		"staunty",
+		"tatiana",
+	];
+	public optionsList: string[] = ["Piece Set", "FEN"];
+	public options: ChessOptions;
 
-  constructor() {
-    this.genBoard(); 
-    this.storedPiece = this.getNull(null);
-    this.turn = "white";
-    this.stage = "piece";
-  }
+	public boardSize: number;
+	public mouseLoc: number[];
 
-  private getNull(key: number) {
-    return {
-      key: key, // ID of tile
-      name: "", // name of piece
-      abbr: "", // abbreviation of name
-      value: 0, // numeric ID of piece
-      player: "", // name of player
-    }
-  }
+	public board: Tile[] = [];
+	private boardState: number[];
+	private letters: string[];
 
-  public getLetter(x: number): string {
-    return this.letters[x];
-  }
+	private storedPiece: Piece;
+	private castling: Castling;
+	private currentPlayer: string;
+	private stage: string;
+	private turnHistory: Turn[];
 
-  public genBoard() {
-    let darkTile = false;
-    let i = 0;
-    let boardState = [
-      10, 9, 8,11,12, 8, 9,10,  
-       7, 7, 7, 7, 7, 7, 7, 7,
-       0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0,
-       1, 1, 1, 1, 1, 1, 1, 1,
-       4, 3, 2, 6, 5, 2, 3, 4,
-    ];
+	constructor() {
+		this.initBoardState();
+		this.initLetters();
+		this.constructNewBoard();
+		this.setDefaults();
+	}
 
-    for (let y = 7; y >= 0; y--) {
-      for (let x = 0; x < 8; x++) {
-        let value = boardState[i];        
-        let defaultPiece = this.pieces.find((piece) => piece.value === value);
-        let key = i;
+	// Setup Methods
+	private constructNewBoard(): void {
+		let darkTile = false;
+		let i = 0;
 
-        if (x !== 0) {
-          darkTile = !darkTile;
-        }
+		for (let y = 7; y >= 0; y--) {
+			for (let x = 0; x < 8; x++) {
+				let value = this.boardState[i];
+				let defaultPiece = this.pieces.find(
+					(piece) => piece.value === value
+				);
+				let key = i;
 
-        let piece: Piece = {
-          key: key, 
-          name: defaultPiece.name,
-          abbr: defaultPiece.abbr,
-          value: defaultPiece.value,
-          player: defaultPiece.player
-        }
-        
-        let tile: Tile = {
-          key: key, 
-          piece: piece,
-          color: darkTile,
-          x: x,
-          y: y,
-          selected: false,
-          enpassant: false,
-          moveable: false
-        };
+				if (x !== 0) {
+					darkTile = !darkTile;
+				}
 
-        this.board.push(tile);
-        i++;
-      }
-    }
-  }
+				let piece: Piece = {
+					key: key,
+					name: defaultPiece.name,
+					abbr: defaultPiece.abbr,
+					value: defaultPiece.value,
+					player: defaultPiece.player,
+				};
 
-  public pieceClicked(key:number): void {
-    // INIT
-    let tile = this.board.find(tile => tile.key === key);
-    this.board.forEach(tile => {tile.selected = false; tile.moveable = false; });
-    console.log("clicked:", this.letters[tile.x], tile.y+1);
+				let tile: Tile = {
+					key: key,
+					piece: piece,
+					color: darkTile,
+					x: x,
+					y: y,
+					selected: false,
+					enpassantable: false,
+					moveable: false,
+				};
 
-    // STAGES: 
-    // 1. Select piece
-    // 2. Error check
-    // 3. Select Location
-    // 4. Error check
-    // 5. Remove past piece and insert into location
-    // 6. Change turn to other player
+				this.board.push(tile);
+				i++;
+			}
+		}
+	}
+	private setDefaults(): void {
+		// Variables
+		this.storedPiece = this.createNullPiece(null);
+		this.currentPlayer = "w";
+		this.stage = "piece";
+		this.boardSize = 500;
 
-    /* 
-      2 clicks: 
-      1st must be your own piece, 
-      2nd must be an empty tile or an opponent's piece
-    */
-   
-    switch (this.stage) {
-      case "piece":
-        this.selectPiece(tile);
-        break;
-      case "location":
-        this.selectLocation(tile);
-        break;
-      default:
-        console.error("something broke...");
-        break;
-    }
-  }
+		// Arrays
+		this.turnHistory = [];
 
-  private selectPiece(tile:Tile): void {
-    if (this.turn === tile.piece.player) {
-      // console.log(`the turn is ${this.turn}'s and the selected piece belongs to ${tile.piece.player}`)
-      this.storedPiece = tile.piece;
-      tile.selected = true;
-      this.stage = "location";
-    }
-  }
+		// Objects
+		this.castling = {
+			wlong: true,
+			wshort: true,
+			blong: true,
+			bshort: true,
+		};
+		this.options = {
+			pieceSet: this.DEFAULT_PIECESET,
+			pieceSetList: this.DEFAULT_THEMES,
+			fenValue: this.DEFAULT_FEN,
+			display: this.DEFAULT_DISPLAY,
+		};
+		this.importFenValue(this.DEFAULT_FEN);
+	}
 
-  private selectLocation(location:Tile): void {
-    // console.log("--- location stage");
-    if (location.key !== this.storedPiece.key && location.piece.player !== this.storedPiece.player) {
-      // console.log("selected location:", location);
-      if (this.validateMove(location)) {
-        console.log("move is valid");
-        this.movePiece(location);
+	// Initialize Methods
+	private initBoardState(): void {
+		this.boardState = [
+			10, 9, 8, 11, 12, 8, 9, 10, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 4, 3, 2,
+			6, 5, 2, 3, 4,
+		];
+	}
+	private initLetters(): void {
+		this.letters = ["a", "b", "c", "d", "e", "f", "g", "h"];
+	}
+	private initMove(): Move {
+		return {
+			turnNum: 0,
+			piece: this.createNullPiece(null),
+			capturing: false,
+			past: [],
+			new: [],
+			notation: "",
+			fenState: "",
+			current: false,
+		};
+	}
+	private createNewTurn(): Turn {
+		return {
+			num: this.turnHistory.length + 1,
+			white: this.initMove(),
+			black: this.initMove(),
+		};
+	}
+	private createNullPiece(key: number) {
+		return {
+			key: key, // ID of tile
+			name: "", // name of piece
+			abbr: "", // abbreviation of name
+			value: 0, // numeric ID of piece
+			player: "", // name of player
+		};
+	}
 
-      } else {
-        console.log("This is not a valid move");
-        this.storedPiece = this.getNull(null);
-        this.stage = "piece";
-      }
+	// Main Methods
+	private selectPiece(tile: Tile): void {
+		if (this.currentPlayer === tile.piece.player) {
+			// console.log(`the turn is ${this.currentPlayer}'s and the selected piece belongs to ${tile.piece.player}`)
+			this.storedPiece = tile.piece;
+			tile.selected = true;
+			this.stage = "location";
+			this.displayMoveableTiles();
+		}
+	}
+	private selectLocation(location: Tile): void {
+		if (
+			location.key !== this.storedPiece.key &&
+			location.piece.player !== this.storedPiece.player
+		) {
+			if (this.validateMove(location, false)) {
+				console.log("move is valid");
+				this.movePiece(location, 1);
+			} else {
+				console.log("This is not a valid move");
+				this.storedPiece = this.createNullPiece(null);
+				this.stage = "piece";
+			}
+		} else if (location.piece.player === this.storedPiece.player) {
+			if (location.piece.key === this.storedPiece.key) {
+				location.selected = false;
+				this.stage = "piece";
+			} else {
+				this.selectPiece(location);
+			}
+		} else {
+			console.log("this is not a valid location");
+			this.storedPiece = this.createNullPiece(null);
+			this.stage = "piece";
+			if (location.key === this.storedPiece.key) {
+				this.selectPiece(location);
+			}
+		}
+	}
+	private movePiece(location: Tile, code: number): void {
+		let piece = this.storedPiece;
+		let capturing = location.piece.value !== 0 ? true : false;
+		if (code === 3) {
+			capturing = true;
+		}
+		let move = this.createMove(this.board[piece.key], location, capturing);
 
-    } else {
-      console.log("this is not a valid location");
-      this.storedPiece = this.getNull(null);
-      this.stage = "piece";
-      if (location.key === this.storedPiece.key) this.selectPiece(location);
-      
-    }
-  }
+		// change location's piece to selected piece
+		this.board[location.key].piece = piece;
+		// change selected piece's tile to empty
+		this.board[piece.key].piece = this.createNullPiece(
+			this.board[piece.key].key
+		);
+		// settle the piece into its new location
+		location.piece.key = location.key;
 
-  private movePiece(location: Tile): void {
-    // console.log("--- moving stage");
-    let piece = this.storedPiece;
+		// record move
+		this.updateFenValue();
+		this.turnHistory.forEach((turn) => {
+			turn.white.current = false;
+			turn.black.current = false;
+		});
+		move.fenState = this.options.fenValue;
+		move.notation = this.createNotation(move);
+		move.current = true;
+		this.setTurn(move);
 
-    // change location's piece to selected piece
-    this.board[location.key].piece = piece;
+		// Clearup Loop ----------------------------------------------
+		this.board.forEach((tile) => {
+			// reset the moveable tile markers for each tile
+			tile.moveable = false;
+		});
+		// erase the piece from storage
+		this.storedPiece = this.createNullPiece(null);
+		if (code !== 2) {
+			this.currentPlayer = this.currentPlayer == "w" ? "b" : "w";
+		}
 
-    // change selected piece's tile to empty
-    this.board[piece.key].piece = this.getNull(this.board[piece.key].key);
-    
-    // settle the piece into its new location
-    location.piece.key = location.key;
+		this.stage = "piece";
+	}
+	private validateMove(
+		newLocation: Tile,
+		checkingAvailableMoves: boolean
+	): boolean {
+		let valid: boolean = false;
 
-    // Clearup Loop ----------------------------------------------
-    this.board.forEach(tile => {
-      // reset the moveable tile markers for each tile
-      tile.moveable = false;
-    });
-    
-    // erase the piece from storage
-    this.storedPiece = this.getNull(null);
+		let data: ValidationData = this.defineValidationData(
+			this.board[this.storedPiece.key],
+			newLocation
+		);
 
-    this.turn = (this.turn == "white") ? "black" : "white";
-    // console.log(this.turn + "'s turn");
+		data.moves.forEach((move) => {
+			if (
+				this.board[newLocation.piece.key].piece.player !==
+				this.currentPlayer
+			) {
+				if (move[0] === data.x2 && move[1] === data.y2) {
+					valid = true;
+					if (!checkingAvailableMoves) {
+						this.board.forEach((tile) => {
+							tile.enpassantable = false;
+						});
 
-    this.stage = "piece";
-  }
+						// if move was a double pawn move, and it's not just doing a move display
+						if (move[2] === 1) {
+							// aha! a sneaky double move... if only if there was a way to do something about this!!!!!!!
+							let doubleMovedPawn = this.findTile(data.x2, data.y2 - 1*data.pV);
+							doubleMovedPawn.enpassantable = true;
+						} else if (move[2] === 2) {
+							let victim = this.findTile(data.x2, data.y2 - 1*data.pV);
+							this.board[victim.key].piece = this.createNullPiece(this.board[victim.piece.key].key);
+						}
+					}
+				}
+			}
+		});
 
-  private validateMove (newLocation: Tile): boolean {
-    // DECLARE VARIABLES --------------------------------------------------------------
-    let isValid: boolean = false; // is the move valid?
-    let moves: number[][] = []; // possible moves 
+		return valid;
+	}
 
-    let piece: Piece = this.storedPiece; // stored piece
-    let pastLocation: Tile = this.board[this.storedPiece.key] // tile on board
-    let white: boolean = piece.player === "white" ? true : false; // is the piece white?
-    
-    let x:number = pastLocation.x; // old location row
-    let y:number = pastLocation.y; // old location col
-    
-    let x2:number = newLocation.x; // new location row
-    let y2:number = newLocation.y; // new location col
+	private defineValidationData(
+		pastLocation: Tile,
+		newLocation: Tile
+	): ValidationData {
+		let white: boolean = this.storedPiece.player === "w" ? true : false;
+		let startrow: number = white ? 1 : 6;
+		let playerValue = white ? 1 : -1;
 
-    // pawn
-    // starting row 2 or 7 based on player
-    let startrow: number = white ? 1 : 6;
-    // p turns number negative if piece is not white
-    let p: number = white ? 1 : -1;
+		let data = {
+			old: pastLocation,
+			new: newLocation,
+			moves: [],
+			x: pastLocation.x,
+			y: pastLocation.y,
+			x2: newLocation.x,
+			y2: newLocation.y,
+			pV: playerValue,
+		};
 
-    // PIECES -------------------------------------
-    // picking a location to move
-    if (piece.name === "pawn") {
-      // 1 - single move
-      if (this.checkTile(x, y + 1*p)) {
-        moves.push([x, y + 1*p]); 
+		let correctDirection = false;
+		let pieceInTheWay = false;
+		let min = 0;
+		let max = 0;
 
-        // 2 - double move
-        // must be previously unmoved (on its starting row)
-        if (this.checkTile(x, y + 2*p) && y === startrow) {
-          moves.push([x, y + 2*p]); 
-        }
-      }
+		// PIECES -------------------------------------
+		// picking a location to move
+		switch (this.storedPiece.name) {
+			case "pawn":
+				{
+					// 1 - single move
+					if (this.checkTilePawn(data.x, data.y + 1 * playerValue)) {
+						data.moves.push([data.x, data.y + 1 * playerValue, 0]);
 
-      // 3 - capturing piece
-      if ((newLocation.piece.value !== 0) && (newLocation.piece.player !== this.storedPiece.player)) { 
-        moves.push([x + 1, y + 1*p], [x - 1, y + 1*p]);
-      }
+						// 2 - double move
+						// must be previously unmoved (on its starting row)
+						if (
+							this.checkTilePawn(
+								data.x,
+								data.y + 2 * playerValue
+							) &&
+							data.y === startrow
+						) {
+							data.moves.push([
+								data.x,
+								data.y + 2 * playerValue,
+								1,
+							]);
+						}
+					}
 
-      // 4 - en passanting piece
-      if (this.board.find(tile => tile.enpassant === true)) {
-        let victim = this.board.find(tile => tile.enpassant === true);
-        
-        if (victim.y === y) {
-          if (victim.x === x+1) {
-            moves.push([x + 1, y + 1*p]);
-            victim.piece = victim.piece = this.getNull(victim.key);
-            
-          } else if (victim.x === x-1) {
-            moves.push([x - 1, y + 1*p]);
-            victim.piece = victim.piece = this.getNull(victim.key);
-          }
-        }        
-      }
-      
-    }
+					// 3 - capturing Piece
+					if (
+						newLocation.piece.value !== 0 &&
+						newLocation.piece.player !== this.storedPiece.player
+					) {
+						data.moves.push(
+							[data.x + 1, data.y + 1 * playerValue, 0],
+							[data.x - 1, data.y + 1 * playerValue, 0]
+						);
+					}
 
-    // Moves Loop ----------------------------------------------
-    // go through each possible move and see if the new location matches 
-    // console.log(moves);
-    moves.forEach(move => {
-      // console.log(this.getLetter(move[0]) + (move[1]+1));
+					// 4 - en passanting Piece
+					let victim = this.board.find(
+						(tile) => tile.enpassantable === true
+					);
+					if (victim) {
+						// console.log(data.x2, data.y2)
+						// console.log(victim.x, victim.y)
+						if (
+							victim.y === data.y + 1 * playerValue &&
+							(victim.x === data.x + 1 || victim.x === data.x - 1)
+						) {
+							data.moves.push([victim.x, victim.y, 2]);
+						}
+					}
+				}
+				break;
+			case "knight":
+				{
+					data.moves.push(
+						[data.x + 1, data.y + 2, 0],
+						[data.x - 1, data.y + 2, 0],
+						[data.x - 1, data.y - 2, 0],
+						[data.x + 1, data.y - 2, 0],
+						[data.x + 2, data.y + 1, 0],
+						[data.x - 2, data.y + 1, 0],
+						[data.x - 2, data.y - 1, 0],
+						[data.x + 2, data.y - 1, 0]
+					);
+				}
+				break;
+			case "rook":
+				{
+					// have to see if a Piece is in the way
+					// 1. loop through each tile in the row away from Piece until it reaches the board end
+					// 2. if a tile has a Piece and the Piece is not the new location, flag
+					// if y1 is the same as data.y2: horizontal (only data.x is changing)
 
-      // EN PASSANT - if a pawn completed a special 2 move , temporarily declare it as enpassantable to possible attackers 
-      // - reusing a pawn variable to turn negative or positive based on player
-      if (y2 === y + 2*p && !newLocation.enpassant) {
-        console.log(this.getLetter(x2) + (y2+1), "is enpassantable");
-        newLocation.enpassant = true;
-      }
-      
-      // FIND MOVE --------------------------
-      // if the move[x,y] matches the new location x,y
-      if (move[0] === x2 && move[1] === y2) {
-        isValid = true;
-      }
-    });
-    return isValid;
-  }
+					if (data.y === data.y2) {
+						// horizontal
+						// console.log("horizontal");
+						correctDirection = true;
+						min = data.x < data.x2 ? data.x + 1 : data.x2 + 1;
+						max = data.x < data.x2 ? data.x2 - 1 : data.x - 1;
+						// console.log("max:" + max, "min:" + min);
+						for (let c = min; c <= max; c++) {
+							// console.log(this.findLetter(c), data.y + 1);
 
-  private getPawn (): number[][] {
-    let moves: number[][] = [];
+							if (this.findTile(c, data.y).piece.value !== 0) {
+								// console.log(
+								// 	`Piece on ${data.x2},${data.y2} is in the way!`
+								// );
+								pieceInTheWay = true;
+							}
+						}
+					} else if (data.x === data.x2) {
+						// vertical
+						// console.log("vertical");
+						correctDirection = true;
+						min = data.y < data.y2 ? data.y + 1 : data.y2 + 1;
+						max = data.y < data.y2 ? data.y2 - 1 : data.y - 1;
+						// console.log("max:" + max, "min:" + min);
+						for (let c = min; c <= max; c++) {
+							// console.log(this.findLetter(data.x), c + 1);
 
-    return moves;
-  }
+							if (this.findTile(data.x, c).piece.value !== 0) {
+								pieceInTheWay = true;
+								// console.log(
+								// 	`Piece on ${this.letters[data.x2]},${
+								// 		data.y2 + 1
+								// 	} is in the way!`
+								// );
+							}
+						}
+					}
 
-  // Used to check if a tile is empty, or if there is a piece that the opposing player owns
-  private checkTile (x: number, y: number): boolean {
-    let valid = false;
-    // if the tile has a piece in it, it is not valid.
-    let tile = this.getTile(x,y);
+					if (!pieceInTheWay && correctDirection) {
+						if (
+							newLocation.piece.player !== this.storedPiece.player
+						) {
+							data.moves.push([data.x2, data.y2, 0]);
 
-    if (tile.piece.value === 0 && tile.piece.player !== this.storedPiece.player) {
-      valid = true;
-    }
+							// castling functionality
+							if (this.storedPiece.player === "w") {
+								if (data.y === 0) {
+									if (data.x === 0 && this.castling.wlong) {
+										// console.log(
+										// 	"white can no longer castle long."
+										// );
+										this.castling.wlong = false;
+									} else if (
+										data.x === 7 &&
+										this.castling.wshort
+									) {
+										// console.log(
+										// 	"white can no longer castle short."
+										// );
+										this.castling.wshort = false;
+									}
+								}
+							} else {
+								if (data.y === 7) {
+									if (data.x === 0 && this.castling.blong) {
+										// console.log(
+										// 	"black can no longer castle long."
+										// );
+										this.castling.blong = false;
+									} else if (
+										data.x === 7 &&
+										this.castling.bshort
+									) {
+										// console.log(
+										// 	"black can no longer castle short."
+										// );
+										this.castling.bshort = false;
+									}
+								}
+							}
+						}
+					}
+				}
+				break;
+			case "king":
+				{
+					data.moves.push(
+						[data.x + 1, data.y + 1, 0],
+						[data.x - 1, data.y + 1, 0],
+						[data.x + 1, data.y - 1, 0],
+						[data.x - 1, data.y - 1, 0],
+						[data.x + 1, data.y, 0],
+						[data.x - 1, data.y, 0],
+						[data.x, data.y + 1, 0],
+						[data.x, data.y - 1, 0]
+					);
 
-    return valid;
-  }
-  
-  private getTile(x: number, y: number): Tile {
-    return this.board.find(tile => tile.x === x && tile.y === y);
-  }
+					// add castling moves
+					let pY = 0; // player Y coord
+					let cD = ""; // castling Direction
 
+					if (this.storedPiece.player === "w") {
+						pY = 0;
+						if (data.x2 === 6 && this.castling.wshort) {
+							cD = "short";
+						} else if (data.x2 === 2 && this.castling.wlong) {
+							cD = "long";
+						}
+					} else if (this.storedPiece.player === "b") {
+						pY = 7;
+						if (data.x2 === 6 && this.castling.bshort) {
+							cD = "short";
+						} else if (data.x2 === 2 && this.castling.blong) {
+							cD = "long";
+						}
+					}
+
+					if (
+						this.findTile(5, pY).piece.value === 0 &&
+						this.findTile(6, pY).piece.value === 0 &&
+						cD === "short"
+					) {
+						data.moves.push([data.x + 2, data.y, 0]);
+						this.castleAction(pY, 7, 5);
+					} else if (
+						this.findTile(2, pY).piece.value === 0 &&
+						this.findTile(3, pY).piece.value === 0 &&
+						cD === "long"
+					) {
+						data.moves.push([data.x - 2, data.y, 0]);
+						this.castleAction(pY, 0, 3);
+					}
+
+					// break castle function if king data.moves
+					if (data.x === 4) {
+						if (this.storedPiece.player === "w" && data.y === 0) {
+							console.log("white can no longer castle.");
+							this.castling.wlong = false;
+							this.castling.wshort = false;
+						} else if (
+							this.storedPiece.player === "b" &&
+							data.y === 7
+						) {
+							console.log("black can no longer castle.");
+							this.castling.blong = false;
+							this.castling.bshort = false;
+						}
+					}
+				}
+				break;
+			case "bishop":
+				{
+					let a =
+						data.x2 >= data.x ? data.x2 - data.x : data.x - data.x2;
+					let b =
+						data.y2 >= data.y ? data.y2 - data.y : data.y - data.y2;
+
+					if (a === b) {
+						correctDirection = true;
+						// eg: if dir is positive, data.x axis goes up by 1 in the tile check
+						let dirx = data.x2 > data.x ? 1 : -1;
+						let diry = data.y2 > data.y ? 1 : -1;
+
+						for (let c = 1; c < a; c++) {
+							let tilex = data.x + c * dirx;
+							let tiley = data.y + c * diry;
+							if (this.findTile(tilex, tiley).piece.value !== 0) {
+								pieceInTheWay = true;
+							}
+						}
+					}
+
+					if (!pieceInTheWay && correctDirection) {
+						if (
+							newLocation.piece.player !== this.storedPiece.player
+						) {
+							data.moves.push([data.x2, data.y2, 0]);
+						}
+					}
+				}
+				break;
+			case "queen":
+				{
+					let a =
+						data.x2 >= data.x ? data.x2 - data.x : data.x - data.x2;
+					let b =
+						data.y2 >= data.y ? data.y2 - data.y : data.y - data.y2;
+
+					// literally just data.moves like bishop and rook
+					if (data.y === data.y2) {
+						// horizontal
+						correctDirection = true;
+						min = data.x < data.x2 ? data.x + 1 : data.x2 + 1;
+						max = data.x < data.x2 ? data.x2 - 1 : data.x - 1;
+						for (let c = min; c <= max; c++) {
+							if (this.findTile(c, data.y).piece.value !== 0) {
+								pieceInTheWay = true;
+							}
+						}
+					} else if (data.x === data.x2) {
+						// vertical
+						correctDirection = true;
+						min = data.y < data.y2 ? data.y + 1 : data.y2 + 1;
+						max = data.y < data.y2 ? data.y2 - 1 : data.y - 1;
+						for (let c = min; c <= max; c++) {
+							if (this.findTile(data.x, c).piece.value !== 0) {
+								pieceInTheWay = true;
+							}
+						}
+					} else if (a === b) {
+						// diagonal
+						correctDirection = true;
+						// eg: if dir is positive, data.x axis goes up by 1 in the tile check
+						let dirx = data.x2 > data.x ? 1 : -1;
+						let diry = data.y2 > data.y ? 1 : -1;
+
+						for (let c = 1; c < a; c++) {
+							let tilex = data.x + c * dirx;
+							let tiley = data.y + c * diry;
+							if (this.findTile(tilex, tiley).piece.value !== 0) {
+								pieceInTheWay = true;
+							}
+						}
+					}
+
+					if (!pieceInTheWay && correctDirection) {
+						if (
+							newLocation.piece.player !== this.storedPiece.player
+						) {
+							data.moves.push([data.x2, data.y2, 0]);
+						}
+					}
+				}
+				break;
+		}
+
+		return data;
+	}
+	private checkTilePawn(x: number, y: number): boolean {
+		// Used to check if a tile is empty, or if there is a piece that the opposing player owns
+		let valid = false;
+		// if the tile has a piece in it, it is not valid.
+		let tile = this.findTile(x, y);
+		if (
+			tile.piece.value === 0 &&
+			tile.piece.player !== this.storedPiece.player
+		) {
+			valid = true;
+		}
+
+		return valid;
+	}
+
+	private castleAction(pY: number, rX: number, rX2: number): void {
+		console.log("rX,rX2:" + rX, rX2);
+		let saveTheStoredPiece = this.storedPiece;
+		this.storedPiece = this.findTile(rX, pY).piece;
+		this.movePiece(this.findTile(rX2, pY), 2);
+		this.storedPiece = saveTheStoredPiece;
+	}
+
+	private displayMoveableTiles(): void {
+		this.board.forEach((tile) => {
+			if (this.validateMove(tile, true)) {
+				tile.moveable = true;
+			}
+			if (tile.enpassantable) {
+				console.log("blah");
+			}
+		});
+	}
+
+	// Search Methods
+	private findAbbr(value: number): string {
+		return this.pieces[value].abbr;
+	}
+	private findTile(x: number, y: number): Tile {
+		return this.board.find((tile) => tile.x === x && tile.y === y);
+	}
+	private findLetter(x: number): string {
+		return this.letters[x];
+	}
+	private findPieceFromChar(char: string): Piece {
+		let piece = this.pieces.find((piece) => piece.abbr == char);
+		// return this.pieces.find(piece => {piece.abbr == char})
+		return piece;
+		// return piece;
+	}
+
+	// Recording
+	private createMove(oldTile: Tile, newTile: Tile, capturing: boolean): Move {
+		let move = this.initMove();
+		move.piece = oldTile.piece;
+		move.capturing = capturing;
+		move.past = [oldTile.x, oldTile.y];
+		move.new = [newTile.x, newTile.y];
+		move.fenState = "";
+		return move;
+	}
+	private createNotation(move: Move): string {
+		let note: string = "";
+		let pieceAbbr: string = move.piece.abbr.toUpperCase();
+
+		let pastCoord: string =
+			this.findLetter(move.past[0]) + (move.past[1] + 1);
+		let newCoord: string = this.findLetter(move.new[0]) + (move.new[1] + 1);
+
+		if (move.capturing) {
+			pieceAbbr = pieceAbbr === "P" ? pastCoord : pieceAbbr;
+			note = pieceAbbr[0] + "x" + newCoord;
+		} else {
+			note = pieceAbbr === "P" ? newCoord : pieceAbbr + newCoord;
+		}
+		return note;
+	}
+	private setTurn(move: Move): void {
+		// console.log("move: ", move.current)
+		let turn =
+			this.currentPlayer === "w"
+				? this.createNewTurn()
+				: this.turnHistory[this.turnHistory.length - 1];
+
+		if (this.currentPlayer === "w") {
+			turn.white = move;
+			turn.white.turnNum = turn.num;
+			this.turnHistory.push(turn);
+			// console.log(this.turnHistory);
+		} else {
+			turn.black = move;
+			turn.black.turnNum = turn.num;
+			// console.log(this.turnHistory);
+		}
+	}
+	private updateFenValue(): void {
+		let string: string = "";
+		let rowID: number = 0;
+		let spaces = 0;
+
+		this.board.forEach((tile) => {
+			let data = tile.piece.value;
+			if (data !== 0) {
+				string = spaces != 0 ? (string += spaces) : string;
+				spaces = 0;
+				string += this.findAbbr(data);
+			} else {
+				spaces++;
+			}
+			if (rowID === 7) {
+				rowID = 0;
+				string = spaces != 0 ? (string += spaces) : string;
+				string += "/";
+				spaces = 0;
+			} else {
+				rowID++;
+			}
+		});
+		this.options.fenValue = string.slice(0, -1) + " w KQkq - 0 1";
+	}
+	private importFenValue(fen: string): void {
+		let fenArray: string[] = [];
+
+		fen.split("/").forEach((row, i) => {
+			if (i === 7) {
+				let info = row.split(" ");
+				// console.log(info);
+				// ['RNBQKBNR', 'w', 'KQkq', '-', '0', '1']
+				row = info[0];
+				this.currentPlayer = info[1];
+			}
+
+			row.split("").forEach((char) => {
+				if (+char) {
+					for (let i = 0; i < Number(char); i++) {
+						fenArray.push("");
+					}
+				} else {
+					fenArray.push(char);
+				}
+			});
+		});
+		for (let i = 0; i < 64; i++) {
+			let newPiece = this.findPieceFromChar(fenArray[i]);
+			this.board[i].piece.abbr = newPiece.abbr;
+			this.board[i].piece.name = newPiece.name;
+			this.board[i].piece.player = newPiece.player;
+			this.board[i].piece.value = newPiece.value;
+		}
+	}
+	private validateFenValue(fen: string): boolean {
+		let flag = false;
+		/** Test Cases:
+		 * 1. Fen must have length of 8 sections seperated by '/', then a 9th one containing Fen metadata.
+		 * 2. Each section can only contain letters 'pnbrqk or PNBRQK or empty'
+		 * 3. Each section must be 8 characters long
+		 */
+
+		if (fen.split("/").length !== 8) {
+			flag = true;
+		}
+		return !flag;
+	}
+
+	// Event Listeners
+	public onFenValueChange(value: string): void {
+		if (this.validateFenValue(value)) {
+			// console.log(value);
+
+			this.importFenValue(value);
+			this.options.fenValue = value;
+		}
+	}
+	public pieceClicked(event: MouseEvent, key: number): void {
+		this.mouseLoc = [event.clientX, event.clientY]
+		// INIT
+		let tile = this.board.find((tile) => tile.key === key);
+		this.board.forEach((tile) => {
+			tile.selected = false;
+			tile.moveable = false;
+		});
+		console.log("tile:", this.findLetter(tile.x) + (tile.y + 1));
+		// console.log(this.mouseLoc);
+
+		switch (this.stage) {
+			case "piece":
+				this.selectPiece(tile);
+				break;
+			case "location":
+				this.selectLocation(tile);
+				break;
+			default:
+				console.error("something broke...");
+				break;
+		}
+	}
+	public changeSet(theme: string): void {
+		this.options.pieceSet = theme;
+		console.log("theme is", theme);
+	}
+	public openTab(tab: string) {
+		this.options.display = tab;
+	}
+	public getPast(move: Move) {
+		this.turnHistory.forEach((turn) => {
+			turn.white.current = false;
+			turn.black.current = false;
+		});
+		console.log(move.fenState);
+		this.options.fenValue = move.fenState;
+		this.importFenValue(move.fenState);
+
+		if (move.piece.player === "w") {
+			this.turnHistory[move.turnNum - 1].white.current = true;
+			this.currentPlayer = "b";
+			this.turnHistory.splice(move.turnNum);
+			this.turnHistory[move.turnNum - 1].black = this.initMove();
+		} else {
+			this.turnHistory[move.turnNum - 1].black.current = true;
+			this.currentPlayer = "w";
+			this.turnHistory.splice(move.turnNum);
+		}
+	}
+
+	public piecePickedUp(event: CdkDrag<Tile>, tile: Tile) {
+    // // console.log(tile);
+		// if (this.storedPiece.player === "") {
+			console.log(event._dragRef, event);
+			this.selectPiece(tile);
+		// }
+	}
+
+	public pieceDropped(tile: Tile) {
+		if (this.storedPiece.player !== "" && this.storedPiece.player !== tile.piece.player) {
+			this.selectLocation(tile);
+		}
+	}
 } // ENDING BRACE

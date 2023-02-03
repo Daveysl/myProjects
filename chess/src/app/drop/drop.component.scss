@@ -1,0 +1,286 @@
+// COLORS
+$background_1: rgb(18, 19, 22);
+$background_2: rgb(43, 45, 47);
+$background_3: rgb(50, 50, 54);
+$background_4: rgb(56, 58, 60);
+$background_5: rgb(73, 75, 77);
+
+$text_1: #f0f0f0;
+$text_2: #f0f0f0cb;
+
+$primary0: #1648adce;
+$primary1: #2f70e0;
+$primary2: #6099fc;
+$primary3: #a4c6ff;
+
+$success: #befd9dff;
+$error: #f89496ff;
+
+// $tile_light: #f0d9b5;
+$tile_light: #b8b5b1;
+// $tile_dark: #b58863;
+$tile_dark: #746e66;
+
+// SIZES
+$text_size_1: 0.3em;
+$heading_1: 1.1em;
+$heading_2: 1.1em;
+
+$default_board_size: 500px;
+$spacing_1: 15px;
+$spacing_2: 10px;
+
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
+* {
+	font-family: "Open Sans", sans-serif;
+	box-sizing: border-box;
+}
+
+.background {
+	position: absolute;
+	z-index: -10;
+	width: 100%;
+	height: 100%;
+	background-color: $background_1;
+}
+
+h1 {
+	font-size: $heading_1;
+	padding: $spacing_2;
+	margin: 0;
+}
+button {
+	border: none;
+	padding: 5px;
+	margin: 0;
+	color: $text_1;
+	background-color: $background_3;
+
+	&:hover {
+		cursor: pointer;
+	}
+	&:active {
+		background-color: $primary1;
+	}
+}
+
+.cdk-drag-preview {
+	width: 150%!important;
+	height: 150%!important;
+	.piece {
+		background: white;
+		width: 150%;
+		height: 150%;
+		opacity: 0.5;
+	}
+}
+
+.cdk-drag-placeholder {
+	position: fixed;
+	display: none;
+}
+
+.cdk-drop-list-receiving {
+	background-color: $success;
+}
+
+#container {
+	color: $text_1;
+	display: grid;
+	grid-template-columns: $default_board_size 280px;
+	grid-template-rows: $default_board_size 174px;
+	gap: $spacing_1;
+	padding-left: $spacing_1;
+	padding-top: $spacing_1;
+}
+
+#chess {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+
+	h1 {
+		display: none;
+	}
+
+	.board {
+		width: $default_board_size;
+		height: $default_board_size;
+		display: flex;
+		flex-flow: row wrap;
+
+		.tile {
+			width: 12.5%;
+			height: 12.5%;
+			background-color: $tile_light;
+			align-items: center;
+			justify-content: center;
+
+			&__dark {
+				background-color: $tile_dark;
+			}
+
+			&.moveable {
+				width: 30%;
+				height: 30%;
+				border-radius: 100%;
+				cursor: pointer;
+			}
+		}
+
+		.piece_placeholder {
+			width: calc($default_board_size / 12.5);
+			height: calc($default_board_size / 12.5);
+
+			.piece {
+				width: 100%;
+				height: 100%;
+				cursor: pointer;
+				filter: opacity(100%);
+				transition: all 0.2s;
+
+				&.selected {
+					filter: opacity(50%);
+					transition: all 0.2s;
+				}
+			}
+		}
+	}
+}
+
+#sidebar {
+	width: 100%;
+	height: 100%;
+	background-color: $background_2;
+
+	h1 {
+		width: 100%;
+		background-color: $background_3;
+	}
+
+	ul {
+		width: 100%;
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+
+		& li {
+			width: 100%;
+			display: grid;
+			grid-template-columns: 30px calc(50% - 15px) calc(50% - 15px);
+			grid-auto-rows: 30px;
+
+			div {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+
+				&:first-of-type {
+					background-color: $background_2;
+
+					justify-content: center;
+				}
+				&:not(div:first-of-type) {
+					padding-left: 10px;
+					&:hover {
+						background-color: $primary0;
+						cursor: pointer;
+					}
+				}
+			}
+			&:last-of-type div:last-of-type {
+				background-color: $primary1;
+			}
+		}
+	}
+}
+
+#settings {
+	width: 100%;
+	background-color: $background_2;
+
+	.tab {
+		width: 100%;
+		background-color: $background_3;
+
+		&:hover {
+			background-color: $primary0;
+		}
+
+		&:active {
+			background-color: $primary1;
+		}
+
+		&__active {
+			background-color: $background_2;
+		}
+	}
+
+	.tab_display {
+		width: 100%;
+
+		.carosel {
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			overflow-y: hidden;
+
+			&::-webkit-scrollbar {
+				width: 10px;
+				&-track {
+					background-color: $background_3;
+				}
+				&-thumb {
+					background-color: $background_5;
+				}
+			}
+
+			.theme {
+				display: block;
+				background-color: $background_4;
+				padding: 10px;
+				margin: 0;
+
+				&__selected {
+					background-color: $primary1;
+				}
+
+				&:hover {
+					background-color: $primary0;
+				}
+
+				&:active {
+					background-color: $primary1;
+				}
+
+				img {
+					width: 60px;
+					height: 60px;
+				}
+			}
+		}
+	}
+
+	.exportFen {
+		width: 100%;
+		border: none;
+
+		.fenInput {
+			width: 100%;
+		}
+	}
+}
+
+#controls {
+	width: 100%;
+	background-color: $background_2;
+	.controls {
+		padding: $spacing_2;
+
+		button {
+			background-color: $background_4;
+		}
+	}
+}
