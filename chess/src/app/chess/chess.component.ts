@@ -13,7 +13,7 @@ import {
 	Move,
 	Turn,
 	ValidationData,
-} from "./chess.model";
+} from "../models/chess.model";
 import { CdkDrag } from "@angular/cdk/drag-drop";
 
 @Component({
@@ -22,6 +22,8 @@ import { CdkDrag } from "@angular/cdk/drag-drop";
 	styleUrls: ["./chess.component.scss"],
 })
 export class ChessComponent {
+	// List of each chess piece
+	// first space (0) used for blank or null space
 	public pieces: Piece[] = [
 		{
 			key: null, // ID of tile
@@ -29,6 +31,7 @@ export class ChessComponent {
 			abbr: "", // abbreviation of name
 			value: 0, // numeric ID of piece
 			player: "", // name of player
+			validMoves: []
 		},
 		{
 			key: null,
@@ -36,6 +39,7 @@ export class ChessComponent {
 			abbr: "P",
 			value: 1,
 			player: "w",
+			validMoves: []
 		},
 		{
 			key: null,
@@ -43,6 +47,7 @@ export class ChessComponent {
 			abbr: "B",
 			value: 2,
 			player: "w",
+			validMoves: []
 		},
 		{
 			key: null,
@@ -50,6 +55,7 @@ export class ChessComponent {
 			abbr: "N",
 			value: 3,
 			player: "w",
+			validMoves: []
 		},
 		{
 			key: null,
@@ -57,6 +63,7 @@ export class ChessComponent {
 			abbr: "R",
 			value: 4,
 			player: "w",
+			validMoves: []
 		},
 		{
 			key: null,
@@ -64,6 +71,7 @@ export class ChessComponent {
 			abbr: "K",
 			value: 5,
 			player: "w",
+			validMoves: []
 		},
 		{
 			key: null,
@@ -71,6 +79,7 @@ export class ChessComponent {
 			abbr: "Q",
 			value: 6,
 			player: "w",
+			validMoves: []
 		},
 		{
 			key: null,
@@ -78,6 +87,7 @@ export class ChessComponent {
 			abbr: "p",
 			value: 7,
 			player: "b",
+			validMoves: []
 		},
 		{
 			key: null,
@@ -85,6 +95,7 @@ export class ChessComponent {
 			abbr: "b",
 			value: 8,
 			player: "b",
+			validMoves: []
 		},
 		{
 			key: null,
@@ -92,6 +103,7 @@ export class ChessComponent {
 			abbr: "n",
 			value: 9,
 			player: "b",
+			validMoves: []
 		},
 		{
 			key: null,
@@ -99,6 +111,7 @@ export class ChessComponent {
 			abbr: "r",
 			value: 10,
 			player: "b",
+			validMoves: []
 		},
 		{
 			key: null,
@@ -106,6 +119,7 @@ export class ChessComponent {
 			abbr: "q",
 			value: 11,
 			player: "b",
+			validMoves: []
 		},
 		{
 			key: null,
@@ -113,14 +127,18 @@ export class ChessComponent {
 			abbr: "k",
 			value: 12,
 			player: "b",
+			validMoves: []
 		},
 	];
-	// used in the options object
+
+	// FEN notation string, used for recording positions 
 	public DEFAULT_FEN: string =
 		"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+	//  default theme set name for pieces
 	public DEFAULT_PIECESET: string = "cburnett";
+	//  default option displayed
 	public DEFAULT_DISPLAY: string = "Piece Set";
-
+	// list of themes available
 	public DEFAULT_THEMES: string[] = [
 		"theme1",
 		"theme2",
@@ -153,21 +171,33 @@ export class ChessComponent {
 		"staunty",
 		"tatiana",
 	];
+	// expandable list of options
 	public optionsList: string[] = ["Piece Set", "FEN"];
+	//  object for options
 	public options: ChessOptions;
 	
+	// adjustable board length
 	public boardSize: number;
+	// recorded mouse location (currently unused)
 	public mouseLoc: number[];
 	
+	// board initiated
 	public board: Tile[] = [];
-	private boardState: number[];
+	// list of coordinate letters
 	private letters: string[];
 	
+	// tile that was selected last
 	private storedTile: Tile;
+	// the current turn
 	public currentPlayer: string;
 	
+	// object to check if castle move is legal
 	private castling: Castling;
+
+	// check if selecting a piece or moving to a location
 	private step: string;
+	
+	// list of past moves 
 	private turnHistory: Turn[];
 
 	constructor() {
@@ -203,78 +233,82 @@ export class ChessComponent {
 		this.importFenValue(this.DEFAULT_FEN);
 	}
 
-	// Initialize Methods
+	// Initialize Methods ---------------------------------------------------------------------------------------
+	// initialize the board 
 	private initBoard(): void {
+		// created a board based on a past board generation loop
 		this.board = [
-		{key:0,piece:{key:0,name:"rook",abbr:"r",value:10,player:"b"},color:false,x:0,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:1,piece:{key:1,name:"knight",abbr:"n",value:9,player:"b"},color:true,x:1,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:2,piece:{key:2,name:"bishop",abbr:"b",value:8,player:"b"},color:false,x:2,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:3,piece:{key:3,name:"queen",abbr:"q",value:11,player:"b"},color:true,x:3,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:4,piece:{key:4,name:"king",abbr:"k",value:12,player:"b"},color:false,x:4,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:5,piece:{key:5,name:"bishop",abbr:"b",value:8,player:"b"},color:true,x:5,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:6,piece:{key:6,name:"knight",abbr:"n",value:9,player:"b"},color:false,x:6,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:7,piece:{key:7,name:"rook",abbr:"r",value:10,player:"b"},color:true,x:7,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:8,piece:{key:8,name:"pawn",abbr:"p",value:7,player:"b"},color:true,x:0,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:9,piece:{key:9,name:"pawn",abbr:"p",value:7,player:"b"},color:false,x:1,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:10,piece:{key:10,name:"pawn",abbr:"p",value:7,player:"b"},color:true,x:2,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:11,piece:{key:11,name:"pawn",abbr:"p",value:7,player:"b"},color:false,x:3,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:12,piece:{key:12,name:"pawn",abbr:"p",value:7,player:"b"},color:true,x:4,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:13,piece:{key:13,name:"pawn",abbr:"p",value:7,player:"b"},color:false,x:5,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:14,piece:{key:14,name:"pawn",abbr:"p",value:7,player:"b"},color:true,x:6,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:15,piece:{key:15,name:"pawn",abbr:"p",value:7,player:"b"},color:false,x:7,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:16,piece:{key:16,name:"",abbr:"",value:0,player:""},color:false,x:0,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:17,piece:{key:17,name:"",abbr:"",value:0,player:""},color:true,x:1,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:18,piece:{key:18,name:"",abbr:"",value:0,player:""},color:false,x:2,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:19,piece:{key:19,name:"",abbr:"",value:0,player:""},color:true,x:3,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:20,piece:{key:20,name:"",abbr:"",value:0,player:""},color:false,x:4,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:21,piece:{key:21,name:"",abbr:"",value:0,player:""},color:true,x:5,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:22,piece:{key:22,name:"",abbr:"",value:0,player:""},color:false,x:6,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:23,piece:{key:23,name:"",abbr:"",value:0,player:""},color:true,x:7,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:24,piece:{key:24,name:"",abbr:"",value:0,player:""},color:true,x:0,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:25,piece:{key:25,name:"",abbr:"",value:0,player:""},color:false,x:1,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:26,piece:{key:26,name:"",abbr:"",value:0,player:""},color:true,x:2,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:27,piece:{key:27,name:"",abbr:"",value:0,player:""},color:false,x:3,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:28,piece:{key:28,name:"",abbr:"",value:0,player:""},color:true,x:4,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:29,piece:{key:29,name:"",abbr:"",value:0,player:""},color:false,x:5,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:30,piece:{key:30,name:"",abbr:"",value:0,player:""},color:true,x:6,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:31,piece:{key:31,name:"",abbr:"",value:0,player:""},color:false,x:7,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:32,piece:{key:32,name:"",abbr:"",value:0,player:""},color:false,x:0,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:33,piece:{key:33,name:"",abbr:"",value:0,player:""},color:true,x:1,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:34,piece:{key:34,name:"",abbr:"",value:0,player:""},color:false,x:2,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:35,piece:{key:35,name:"",abbr:"",value:0,player:""},color:true,x:3,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:36,piece:{key:36,name:"",abbr:"",value:0,player:""},color:false,x:4,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:37,piece:{key:37,name:"",abbr:"",value:0,player:""},color:true,x:5,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:38,piece:{key:38,name:"",abbr:"",value:0,player:""},color:false,x:6,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:39,piece:{key:39,name:"",abbr:"",value:0,player:""},color:true,x:7,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:40,piece:{key:40,name:"",abbr:"",value:0,player:""},color:true,x:0,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:41,piece:{key:41,name:"",abbr:"",value:0,player:""},color:false,x:1,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:42,piece:{key:42,name:"",abbr:"",value:0,player:""},color:true,x:2,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:43,piece:{key:43,name:"",abbr:"",value:0,player:""},color:false,x:3,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:44,piece:{key:44,name:"",abbr:"",value:0,player:""},color:true,x:4,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:45,piece:{key:45,name:"",abbr:"",value:0,player:""},color:false,x:5,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:46,piece:{key:46,name:"",abbr:"",value:0,player:""},color:true,x:6,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:47,piece:{key:47,name:"",abbr:"",value:0,player:""},color:false,x:7,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:48,piece:{key:48,name:"pawn",abbr:"P",value:1,player:"w"},color:false,x:0,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:49,piece:{key:49,name:"pawn",abbr:"P",value:1,player:"w"},color:true,x:1,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:50,piece:{key:50,name:"pawn",abbr:"P",value:1,player:"w"},color:false,x:2,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:51,piece:{key:51,name:"pawn",abbr:"P",value:1,player:"w"},color:true,x:3,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:52,piece:{key:52,name:"pawn",abbr:"P",value:1,player:"w"},color:false,x:4,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:53,piece:{key:53,name:"pawn",abbr:"P",value:1,player:"w"},color:true,x:5,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:54,piece:{key:54,name:"pawn",abbr:"P",value:1,player:"w"},color:false,x:6,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:55,piece:{key:55,name:"pawn",abbr:"P",value:1,player:"w"},color:true,x:7,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:56,piece:{key:56,name:"rook",abbr:"R",value:4,player:"w"},color:true,x:0,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:57,piece:{key:57,name:"knight",abbr:"N",value:3,player:"w"},color:false,x:1,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:58,piece:{key:58,name:"bishop",abbr:"B",value:2,player:"w"},color:true,x:2,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:59,piece:{key:59,name:"queen",abbr:"Q",value:6,player:"w"},color:false,x:3,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:60,piece:{key:60,name:"king",abbr:"K",value:5,player:"w"},color:true,x:4,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:61,piece:{key:61,name:"bishop",abbr:"B",value:2,player:"w"},color:false,x:5,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:62,piece:{key:62,name:"knight",abbr:"N",value:3,player:"w"},color:true,x:6,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:63,piece:{key:63,name:"rook",abbr:"R",value:4,player:"w"},color:false,x:7,y:0,selected:false,enpassantable:false,moveable:false}
+		{key:0,piece:{key:0,name:"rook",abbr:"r",value:10,player:"b",validMoves: []},color:false,x:0,y:7,selected:false,enpassantable:false,moveable:false},
+		{key:1,piece:{key:1,name:"knight",abbr:"n",value:9,player:"b",validMoves: []},color:true,x:1,y:7,selected:false,enpassantable:false,moveable:false},
+		{key:2,piece:{key:2,name:"bishop",abbr:"b",value:8,player:"b",validMoves: []},color:false,x:2,y:7,selected:false,enpassantable:false,moveable:false},
+		{key:3,piece:{key:3,name:"queen",abbr:"q",value:11,player:"b",validMoves: []},color:true,x:3,y:7,selected:false,enpassantable:false,moveable:false},
+		{key:4,piece:{key:4,name:"king",abbr:"k",value:12,player:"b",validMoves: []},color:false,x:4,y:7,selected:false,enpassantable:false,moveable:false},
+		{key:5,piece:{key:5,name:"bishop",abbr:"b",value:8,player:"b",validMoves: []},color:true,x:5,y:7,selected:false,enpassantable:false,moveable:false},
+		{key:6,piece:{key:6,name:"knight",abbr:"n",value:9,player:"b",validMoves: []},color:false,x:6,y:7,selected:false,enpassantable:false,moveable:false},
+		{key:7,piece:{key:7,name:"rook",abbr:"r",value:10,player:"b",validMoves: []},color:true,x:7,y:7,selected:false,enpassantable:false,moveable:false},
+		{key:8,piece:{key:8,name:"pawn",abbr:"p",value:7,player:"b",validMoves: []},color:true,x:0,y:6,selected:false,enpassantable:false,moveable:false},
+		{key:9,piece:{key:9,name:"pawn",abbr:"p",value:7,player:"b",validMoves: []},color:false,x:1,y:6,selected:false,enpassantable:false,moveable:false},
+		{key:10,piece:{key:10,name:"pawn",abbr:"p",value:7,player:"b",validMoves: []},color:true,x:2,y:6,selected:false,enpassantable:false,moveable:false},
+		{key:11,piece:{key:11,name:"pawn",abbr:"p",value:7,player:"b",validMoves: []},color:false,x:3,y:6,selected:false,enpassantable:false,moveable:false},
+		{key:12,piece:{key:12,name:"pawn",abbr:"p",value:7,player:"b",validMoves: []},color:true,x:4,y:6,selected:false,enpassantable:false,moveable:false},
+		{key:13,piece:{key:13,name:"pawn",abbr:"p",value:7,player:"b",validMoves: []},color:false,x:5,y:6,selected:false,enpassantable:false,moveable:false},
+		{key:14,piece:{key:14,name:"pawn",abbr:"p",value:7,player:"b",validMoves: []},color:true,x:6,y:6,selected:false,enpassantable:false,moveable:false},
+		{key:15,piece:{key:15,name:"pawn",abbr:"p",value:7,player:"b",validMoves: []},color:false,x:7,y:6,selected:false,enpassantable:false,moveable:false},
+		{key:16,piece:{key:16,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:0,y:5,selected:false,enpassantable:false,moveable:false},
+		{key:17,piece:{key:17,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:1,y:5,selected:false,enpassantable:false,moveable:false},
+		{key:18,piece:{key:18,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:2,y:5,selected:false,enpassantable:false,moveable:false},
+		{key:19,piece:{key:19,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:3,y:5,selected:false,enpassantable:false,moveable:false},
+		{key:20,piece:{key:20,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:4,y:5,selected:false,enpassantable:false,moveable:false},
+		{key:21,piece:{key:21,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:5,y:5,selected:false,enpassantable:false,moveable:false},
+		{key:22,piece:{key:22,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:6,y:5,selected:false,enpassantable:false,moveable:false},
+		{key:23,piece:{key:23,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:7,y:5,selected:false,enpassantable:false,moveable:false},
+		{key:24,piece:{key:24,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:0,y:4,selected:false,enpassantable:false,moveable:false},
+		{key:25,piece:{key:25,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:1,y:4,selected:false,enpassantable:false,moveable:false},
+		{key:26,piece:{key:26,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:2,y:4,selected:false,enpassantable:false,moveable:false},
+		{key:27,piece:{key:27,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:3,y:4,selected:false,enpassantable:false,moveable:false},
+		{key:28,piece:{key:28,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:4,y:4,selected:false,enpassantable:false,moveable:false},
+		{key:29,piece:{key:29,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:5,y:4,selected:false,enpassantable:false,moveable:false},
+		{key:30,piece:{key:30,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:6,y:4,selected:false,enpassantable:false,moveable:false},
+		{key:31,piece:{key:31,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:7,y:4,selected:false,enpassantable:false,moveable:false},
+		{key:32,piece:{key:32,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:0,y:3,selected:false,enpassantable:false,moveable:false},
+		{key:33,piece:{key:33,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:1,y:3,selected:false,enpassantable:false,moveable:false},
+		{key:34,piece:{key:34,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:2,y:3,selected:false,enpassantable:false,moveable:false},
+		{key:35,piece:{key:35,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:3,y:3,selected:false,enpassantable:false,moveable:false},
+		{key:36,piece:{key:36,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:4,y:3,selected:false,enpassantable:false,moveable:false},
+		{key:37,piece:{key:37,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:5,y:3,selected:false,enpassantable:false,moveable:false},
+		{key:38,piece:{key:38,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:6,y:3,selected:false,enpassantable:false,moveable:false},
+		{key:39,piece:{key:39,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:7,y:3,selected:false,enpassantable:false,moveable:false},
+		{key:40,piece:{key:40,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:0,y:2,selected:false,enpassantable:false,moveable:false},
+		{key:41,piece:{key:41,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:1,y:2,selected:false,enpassantable:false,moveable:false},
+		{key:42,piece:{key:42,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:2,y:2,selected:false,enpassantable:false,moveable:false},
+		{key:43,piece:{key:43,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:3,y:2,selected:false,enpassantable:false,moveable:false},
+		{key:44,piece:{key:44,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:4,y:2,selected:false,enpassantable:false,moveable:false},
+		{key:45,piece:{key:45,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:5,y:2,selected:false,enpassantable:false,moveable:false},
+		{key:46,piece:{key:46,name:"",abbr:"",value:0,player:"",validMoves: []},color:true,x:6,y:2,selected:false,enpassantable:false,moveable:false},
+		{key:47,piece:{key:47,name:"",abbr:"",value:0,player:"",validMoves: []},color:false,x:7,y:2,selected:false,enpassantable:false,moveable:false},
+		{key:48,piece:{key:48,name:"pawn",abbr:"P",value:1,player:"w",validMoves: []},color:false,x:0,y:1,selected:false,enpassantable:false,moveable:false},
+		{key:49,piece:{key:49,name:"pawn",abbr:"P",value:1,player:"w",validMoves: []},color:true,x:1,y:1,selected:false,enpassantable:false,moveable:false},
+		{key:50,piece:{key:50,name:"pawn",abbr:"P",value:1,player:"w",validMoves: []},color:false,x:2,y:1,selected:false,enpassantable:false,moveable:false},
+		{key:51,piece:{key:51,name:"pawn",abbr:"P",value:1,player:"w",validMoves: []},color:true,x:3,y:1,selected:false,enpassantable:false,moveable:false},
+		{key:52,piece:{key:52,name:"pawn",abbr:"P",value:1,player:"w",validMoves: []},color:false,x:4,y:1,selected:false,enpassantable:false,moveable:false},
+		{key:53,piece:{key:53,name:"pawn",abbr:"P",value:1,player:"w",validMoves: []},color:true,x:5,y:1,selected:false,enpassantable:false,moveable:false},
+		{key:54,piece:{key:54,name:"pawn",abbr:"P",value:1,player:"w",validMoves: []},color:false,x:6,y:1,selected:false,enpassantable:false,moveable:false},
+		{key:55,piece:{key:55,name:"pawn",abbr:"P",value:1,player:"w",validMoves: []},color:true,x:7,y:1,selected:false,enpassantable:false,moveable:false},
+		{key:56,piece:{key:56,name:"rook",abbr:"R",value:4,player:"w",validMoves: []},color:true,x:0,y:0,selected:false,enpassantable:false,moveable:false},
+		{key:57,piece:{key:57,name:"knight",abbr:"N",value:3,player:"w",validMoves: []},color:false,x:1,y:0,selected:false,enpassantable:false,moveable:false},
+		{key:58,piece:{key:58,name:"bishop",abbr:"B",value:2,player:"w",validMoves: []},color:true,x:2,y:0,selected:false,enpassantable:false,moveable:false},
+		{key:59,piece:{key:59,name:"queen",abbr:"Q",value:6,player:"w",validMoves: []},color:false,x:3,y:0,selected:false,enpassantable:false,moveable:false},
+		{key:60,piece:{key:60,name:"king",abbr:"K",value:5,player:"w",validMoves: []},color:true,x:4,y:0,selected:false,enpassantable:false,moveable:false},
+		{key:61,piece:{key:61,name:"bishop",abbr:"B",value:2,player:"w",validMoves: []},color:false,x:5,y:0,selected:false,enpassantable:false,moveable:false},
+		{key:62,piece:{key:62,name:"knight",abbr:"N",value:3,player:"w",validMoves: []},color:true,x:6,y:0,selected:false,enpassantable:false,moveable:false},
+		{key:63,piece:{key:63,name:"rook",abbr:"R",value:4,player:"w",validMoves: []},color:false,x:7,y:0,selected:false,enpassantable:false,moveable:false}
 	];
 	}
+	// create list of letters for coordinates
 	private initLetters(): void {
 		this.letters = ["a", "b", "c", "d", "e", "f", "g", "h"];
 	}
+	// create a new Move object
 	private initMove(): Move {
 		return {
 			turnNum: 0,
@@ -287,6 +321,7 @@ export class ChessComponent {
 			current: false,
 		};
 	}
+	// create a new Turn object
 	private createNewTurn(): Turn {
 		return {
 			num: this.turnHistory.length + 1,
@@ -294,6 +329,7 @@ export class ChessComponent {
 			black: this.initMove(),
 		};
 	}
+	// create an empty or default piece
 	private createNullPiece(key: number) {
 		return {
 			key: key, // ID of tile
@@ -301,9 +337,11 @@ export class ChessComponent {
 			abbr: "", // abbreviation of name
 			value: 0, // numeric ID of piece
 			player: "", // name of player
+			validMoves: []
 		};
 	}
-	private createNullTile(key:number) {
+	// create an empty or default tile
+	private createNullTile(key: number) {
 		return {
 			key: key,
 			piece: this.createNullPiece(null),
@@ -315,20 +353,17 @@ export class ChessComponent {
 			moveable: false,
 		}
 	}
-	
 
 	// Main Methods
 	private selectTile(tile: Tile): void {
 		if (this.currentPlayer === tile.piece.player) {
-			// console.log(`the turn is ${this.currentPlayer}'s and the selected piece belongs to ${tile.piece.player}`)
 			this.storedTile.piece = tile.piece;
 			tile.selected = true;
 			this.step = "location";
 			this.displayMoveableTiles();
-		} else {
-			console.log("piece player is equal to stored player")
 		}
 	}
+
 	private selectLocation(location: Tile): void {
 		if (location.key !== this.storedTile.piece.key && location.piece.player !== this.storedTile.piece.player) {
 			if (this.validateMove(location, false)) {
@@ -396,10 +431,317 @@ export class ChessComponent {
 
 		this.step = "piece";
 	}
-	private validateMove(
-		newLocation: Tile,
-		checkingAvailableMoves: boolean
-	): boolean {
+	private defineValidationData(pastLocation: Tile, newLocation: Tile): ValidationData {
+		let white: boolean = this.storedTile.piece.player === "w" ? true : false;
+		let startrow: number = white ? 1 : 6;
+		let playerValue = white ? 1 : -1;
+
+		let data = {
+			moves: [],
+			x2: newLocation.x,
+			y2: newLocation.y,
+			pV: playerValue,
+		};
+
+		let x = pastLocation.x;
+		let y = pastLocation.y;
+		let x2 = newLocation.y;
+		let y2 = newLocation.y;
+
+		let correctDirection = false;
+		let pieceInTheWay = false;
+		let min = 0;
+		let max = 0;
+
+		// PIECES -------------------------------------
+		// picking a location to move
+		switch (this.storedTile.piece.name) {
+			case "pawn":
+				{
+					let pawnMoveTile: Tile;
+					// 1 - single move
+					pawnMoveTile = this.findTile(x, y+1*playerValue);
+					if (pawnMoveTile.piece.value === 0 && pawnMoveTile.piece.player !== this.storedTile.piece.player) {
+						data.moves.push([x, y + 1 * playerValue, 0]);
+
+						// 2 - double move
+						// must be previously unmoved (on its starting row)
+						pawnMoveTile = this.findTile(x,y + 2 * playerValue);
+						if (pawnMoveTile.piece.value === 0 && pawnMoveTile.piece.player !== this.storedTile.piece.player&& y === startrow) {
+							data.moves.push([x,y + 2 * playerValue,1,]);
+						}
+					}
+
+					// 3 - capturing Piece
+					if (newLocation.piece.value !== 0 && newLocation.piece.player !== this.storedTile.piece.player) {
+						data.moves.push([x + 1, y + 1 * playerValue, 0],[x - 1, y + 1 * playerValue, 0]);
+					}
+
+					// 4 - en passanting Piece
+					let victim = this.board.find((tile) => tile.enpassantable === true);
+					if (victim) {
+						// console.log(x2, y2)
+						// console.log(victim.x, victim.y)
+						if (
+							victim.y === y + 1 * playerValue &&
+							(victim.x === x + 1 || victim.x === x - 1)
+						) {
+							data.moves.push([victim.x, victim.y, 2]);
+						}
+					}
+				}
+				break;
+			case "knight":
+				{
+					data.moves.push(
+						[x + 1, y + 2, 0],
+						[x - 1, y + 2, 0],
+						[x - 1, y - 2, 0],
+						[x + 1, y - 2, 0],
+						[x + 2, y + 1, 0],
+						[x - 2, y + 1, 0],
+						[x - 2, y - 1, 0],
+						[x + 2, y - 1, 0]
+					);
+				}
+				break;
+			case "rook":
+				{
+					// have to see if a Piece is in the way
+					// 1. loop through each tile in the row away from Piece until it reaches the board end
+					// 2. if a tile has a Piece and the Piece is not the new location, flag
+					// if y1 is the same as y2: horizontal (only x is changing)
+
+					if (y === y2) {
+						// horizontal
+						// console.log("horizontal");
+						correctDirection = true;
+						min = x < x2 ? x + 1 : x2 + 1;
+						max = x < x2 ? x2 - 1 : x - 1;
+						// console.log("max:" + max, "min:" + min);
+						for (let c = min; c <= max; c++) {
+							// console.log(this.findLetter(c), y + 1);
+
+							if (this.findTile(c, y).piece.value !== 0) {
+								// console.log(
+								// 	`Piece on ${x2},${y2} is in the way!`
+								// );
+								pieceInTheWay = true;
+							}
+						}
+					} else if (x === x2) {
+						// vertical
+						// console.log("vertical");
+						correctDirection = true;
+						min = y < y2 ? y + 1 : y2 + 1;
+						max = y < y2 ? y2 - 1 : y - 1;
+						// console.log("max:" + max, "min:" + min);
+						for (let c = min; c <= max; c++) {
+							// console.log(this.findLetter(x), c + 1);
+
+							if (this.findTile(x, c).piece.value !== 0) {
+								pieceInTheWay = true;
+								// console.log(
+								// 	`Piece on ${this.letters[x2]},${
+								// 		y2 + 1
+								// 	} is in the way!`
+								// );
+							}
+						}
+					}
+
+					if (!pieceInTheWay && correctDirection) {
+						if (
+							newLocation.piece.player !== this.storedTile.piece.player
+						) {
+							data.moves.push([x2, y2, 0]);
+
+							// castling functionality
+							if (this.storedTile.piece.player === "w") {
+								if (y === 0) {
+									if (x === 0 && this.castling.wlong) {
+										// console.log(
+										// 	"white can no longer castle long."
+										// );
+										this.castling.wlong = false;
+									} else if (
+										x === 7 &&
+										this.castling.wshort
+									) {
+										// console.log(
+										// 	"white can no longer castle short."
+										// );
+										this.castling.wshort = false;
+									}
+								}
+							} else {
+								if (y === 7) {
+									if (x === 0 && this.castling.blong) {
+										// console.log(
+										// 	"black can no longer castle long."
+										// );
+										this.castling.blong = false;
+									} else if (
+										x === 7 &&
+										this.castling.bshort
+									) {
+										// console.log(
+										// 	"black can no longer castle short."
+										// );
+										this.castling.bshort = false;
+									}
+								}
+							}
+						}
+					}
+				}
+				break;
+			case "king":
+				{
+					data.moves.push(
+						[x + 1, y + 1, 0],
+						[x - 1, y + 1, 0],
+						[x + 1, y - 1, 0],
+						[x - 1, y - 1, 0],
+						[x + 1, y, 0],
+						[x - 1, y, 0],
+						[x, y + 1, 0],
+						[x, y - 1, 0]
+					);
+
+					// add castling moves
+					let pY = 0; // player Y coord
+					let cD = ""; // castling Direction
+
+					if (this.storedTile.piece.player === "w") {
+						pY = 0;
+						if (x2 === 6 && this.castling.wshort) {
+							cD = "short";
+						} else if (x2 === 2 && this.castling.wlong) {
+							cD = "long";
+						}
+					} else if (this.storedTile.piece.player === "b") {
+						pY = 7;
+						if (x2 === 6 && this.castling.bshort) {
+							cD = "short";
+						} else if (x2 === 2 && this.castling.blong) {
+							cD = "long";
+						}
+					}
+
+					if (this.findTile(5, pY).piece.value === 0 && this.findTile(6, pY).piece.value === 0 && cD === "short") {
+						data.moves.push([x + 2, y, 0]);
+						this.castleAction(pY, 7, 5);
+					} else if (this.findTile(2, pY).piece.value === 0 && this.findTile(3, pY).piece.value === 0 && cD === "long") {
+						data.moves.push([x - 2, y, 0]);
+						this.castleAction(pY, 0, 3);
+					}
+
+					// break castle function if king moves
+					if (x === 4) {
+						if (this.storedTile.piece.player === "w" && y === 0) {
+							console.log("white can no longer castle.");
+							this.castling.wlong = false;
+							this.castling.wshort = false;
+						} else if (
+							this.storedTile.piece.player === "b" &&
+							y === 7
+						) {
+							console.log("black can no longer castle.");
+							this.castling.blong = false;
+							this.castling.bshort = false;
+						}
+					}
+				}
+				break;
+			case "bishop":
+				{
+					let a =
+						x2 >= x ? x2 - x : x - x2;
+					let b =
+						y2 >= y ? y2 - y : y - y2;
+
+					if (a === b) {
+						correctDirection = true;
+						// eg: if dir is positive, x axis goes up by 1 in the tile check
+						let dirx = x2 > x ? 1 : -1;
+						let diry = y2 > y ? 1 : -1;
+
+						for (let c = 1; c < a; c++) {
+							let tilex = x + c * dirx;
+							let tiley = y + c * diry;
+							if (this.findTile(tilex, tiley).piece.value !== 0) {
+								pieceInTheWay = true;
+							}
+						}
+					}
+
+					if (!pieceInTheWay && correctDirection) {
+						if (
+							newLocation.piece.player !== this.storedTile.piece.player
+						) {
+							data.moves.push([x2, y2, 0]);
+						}
+					}
+				}
+				break;
+			case "queen":
+				{
+					let a =
+						x2 >= x ? x2 - x : x - x2;
+					let b =
+						y2 >= y ? y2 - y : y - y2;
+
+					// literally just data.moves like bishop and rook
+					if (y === y2) {
+						// horizontal
+						correctDirection = true;
+						min = x < x2 ? x + 1 : x2 + 1;
+						max = x < x2 ? x2 - 1 : x - 1;
+						for (let c = min; c <= max; c++) {
+							if (this.findTile(c, y).piece.value !== 0) {
+								pieceInTheWay = true;
+							}
+						}
+					} else if (x === x2) {
+						// vertical
+						correctDirection = true;
+						min = y < y2 ? y + 1 : y2 + 1;
+						max = y < y2 ? y2 - 1 : y - 1;
+						for (let c = min; c <= max; c++) {
+							if (this.findTile(x, c).piece.value !== 0) {
+								pieceInTheWay = true;
+							}
+						}
+					} else if (a === b) {
+						// diagonal
+						correctDirection = true;
+						// eg: if dir is positive, x axis goes up by 1 in the tile check
+						let dirx = x2 > x ? 1 : -1;
+						let diry = y2 > y ? 1 : -1;
+
+						for (let c = 1; c < a; c++) {
+							let tilex = x + c * dirx;
+							let tiley = y + c * diry;
+							if (this.findTile(tilex, tiley).piece.value !== 0) {
+								pieceInTheWay = true;
+							}
+						}
+					}
+
+					if (!pieceInTheWay && correctDirection) {
+						if (
+							newLocation.piece.player !== this.storedTile.piece.player
+						) {
+							data.moves.push([x2, y2, 0]);
+						}
+					}
+				}
+				break;
+		}
+		return data;
+	}
+	private validateMove(newLocation: Tile, checkingAvailableMoves: boolean): boolean {
 		let valid: boolean = false;
 
 		let data: ValidationData = this.defineValidationData(
@@ -408,10 +750,7 @@ export class ChessComponent {
 		);
 
 		data.moves.forEach((move) => {
-			if (
-				this.board[newLocation.piece.key].piece.player !==
-				this.currentPlayer
-			) {
+			if (this.board[newLocation.piece.key].piece.player !== this.currentPlayer) {
 				if (move[0] === data.x2 && move[1] === data.y2) {
 					valid = true;
 					if (!checkingAvailableMoves) {
@@ -432,349 +771,6 @@ export class ChessComponent {
 				}
 			}
 		});
-
-		return valid;
-	}
-
-	private defineValidationData(
-		pastLocation: Tile,
-		newLocation: Tile
-	): ValidationData {
-		let white: boolean = this.storedTile.piece.player === "w" ? true : false;
-		let startrow: number = white ? 1 : 6;
-		let playerValue = white ? 1 : -1;
-
-		let data = {
-			old: pastLocation,
-			new: newLocation,
-			moves: [],
-			x: pastLocation.x,
-			y: pastLocation.y,
-			x2: newLocation.x,
-			y2: newLocation.y,
-			pV: playerValue,
-		};
-
-		let correctDirection = false;
-		let pieceInTheWay = false;
-		let min = 0;
-		let max = 0;
-
-		// PIECES -------------------------------------
-		// picking a location to move
-		switch (this.storedTile.piece.name) {
-			case "pawn":
-				{
-					// 1 - single move
-					if (this.checkTilePawn(data.x, data.y + 1 * playerValue)) {
-						data.moves.push([data.x, data.y + 1 * playerValue, 0]);
-
-						// 2 - double move
-						// must be previously unmoved (on its starting row)
-						if (
-							this.checkTilePawn(
-								data.x,
-								data.y + 2 * playerValue
-							) &&
-							data.y === startrow
-						) {
-							data.moves.push([
-								data.x,
-								data.y + 2 * playerValue,
-								1,
-							]);
-						}
-					}
-
-					// 3 - capturing Piece
-					if (
-						newLocation.piece.value !== 0 &&
-						newLocation.piece.player !== this.storedTile.piece.player
-					) {
-						data.moves.push(
-							[data.x + 1, data.y + 1 * playerValue, 0],
-							[data.x - 1, data.y + 1 * playerValue, 0]
-						);
-					}
-
-					// 4 - en passanting Piece
-					let victim = this.board.find(
-						(tile) => tile.enpassantable === true
-					);
-					if (victim) {
-						// console.log(data.x2, data.y2)
-						// console.log(victim.x, victim.y)
-						if (
-							victim.y === data.y + 1 * playerValue &&
-							(victim.x === data.x + 1 || victim.x === data.x - 1)
-						) {
-							data.moves.push([victim.x, victim.y, 2]);
-						}
-					}
-				}
-				break;
-			case "knight":
-				{
-					data.moves.push(
-						[data.x + 1, data.y + 2, 0],
-						[data.x - 1, data.y + 2, 0],
-						[data.x - 1, data.y - 2, 0],
-						[data.x + 1, data.y - 2, 0],
-						[data.x + 2, data.y + 1, 0],
-						[data.x - 2, data.y + 1, 0],
-						[data.x - 2, data.y - 1, 0],
-						[data.x + 2, data.y - 1, 0]
-					);
-				}
-				break;
-			case "rook":
-				{
-					// have to see if a Piece is in the way
-					// 1. loop through each tile in the row away from Piece until it reaches the board end
-					// 2. if a tile has a Piece and the Piece is not the new location, flag
-					// if y1 is the same as data.y2: horizontal (only data.x is changing)
-
-					if (data.y === data.y2) {
-						// horizontal
-						// console.log("horizontal");
-						correctDirection = true;
-						min = data.x < data.x2 ? data.x + 1 : data.x2 + 1;
-						max = data.x < data.x2 ? data.x2 - 1 : data.x - 1;
-						// console.log("max:" + max, "min:" + min);
-						for (let c = min; c <= max; c++) {
-							// console.log(this.findLetter(c), data.y + 1);
-
-							if (this.findTile(c, data.y).piece.value !== 0) {
-								// console.log(
-								// 	`Piece on ${data.x2},${data.y2} is in the way!`
-								// );
-								pieceInTheWay = true;
-							}
-						}
-					} else if (data.x === data.x2) {
-						// vertical
-						// console.log("vertical");
-						correctDirection = true;
-						min = data.y < data.y2 ? data.y + 1 : data.y2 + 1;
-						max = data.y < data.y2 ? data.y2 - 1 : data.y - 1;
-						// console.log("max:" + max, "min:" + min);
-						for (let c = min; c <= max; c++) {
-							// console.log(this.findLetter(data.x), c + 1);
-
-							if (this.findTile(data.x, c).piece.value !== 0) {
-								pieceInTheWay = true;
-								// console.log(
-								// 	`Piece on ${this.letters[data.x2]},${
-								// 		data.y2 + 1
-								// 	} is in the way!`
-								// );
-							}
-						}
-					}
-
-					if (!pieceInTheWay && correctDirection) {
-						if (
-							newLocation.piece.player !== this.storedTile.piece.player
-						) {
-							data.moves.push([data.x2, data.y2, 0]);
-
-							// castling functionality
-							if (this.storedTile.piece.player === "w") {
-								if (data.y === 0) {
-									if (data.x === 0 && this.castling.wlong) {
-										// console.log(
-										// 	"white can no longer castle long."
-										// );
-										this.castling.wlong = false;
-									} else if (
-										data.x === 7 &&
-										this.castling.wshort
-									) {
-										// console.log(
-										// 	"white can no longer castle short."
-										// );
-										this.castling.wshort = false;
-									}
-								}
-							} else {
-								if (data.y === 7) {
-									if (data.x === 0 && this.castling.blong) {
-										// console.log(
-										// 	"black can no longer castle long."
-										// );
-										this.castling.blong = false;
-									} else if (
-										data.x === 7 &&
-										this.castling.bshort
-									) {
-										// console.log(
-										// 	"black can no longer castle short."
-										// );
-										this.castling.bshort = false;
-									}
-								}
-							}
-						}
-					}
-				}
-				break;
-			case "king":
-				{
-					data.moves.push(
-						[data.x + 1, data.y + 1, 0],
-						[data.x - 1, data.y + 1, 0],
-						[data.x + 1, data.y - 1, 0],
-						[data.x - 1, data.y - 1, 0],
-						[data.x + 1, data.y, 0],
-						[data.x - 1, data.y, 0],
-						[data.x, data.y + 1, 0],
-						[data.x, data.y - 1, 0]
-					);
-
-					// add castling moves
-					let pY = 0; // player Y coord
-					let cD = ""; // castling Direction
-
-					if (this.storedTile.piece.player === "w") {
-						pY = 0;
-						if (data.x2 === 6 && this.castling.wshort) {
-							cD = "short";
-						} else if (data.x2 === 2 && this.castling.wlong) {
-							cD = "long";
-						}
-					} else if (this.storedTile.piece.player === "b") {
-						pY = 7;
-						if (data.x2 === 6 && this.castling.bshort) {
-							cD = "short";
-						} else if (data.x2 === 2 && this.castling.blong) {
-							cD = "long";
-						}
-					}
-
-					if (this.findTile(5, pY).piece.value === 0 && this.findTile(6, pY).piece.value === 0 && cD === "short") {
-						data.moves.push([data.x + 2, data.y, 0]);
-						this.castleAction(pY, 7, 5);
-					} else if (this.findTile(2, pY).piece.value === 0 && this.findTile(3, pY).piece.value === 0 && cD === "long") {
-						data.moves.push([data.x - 2, data.y, 0]);
-						this.castleAction(pY, 0, 3);
-					}
-
-					// break castle function if king moves
-					if (data.x === 4) {
-						if (this.storedTile.piece.player === "w" && data.y === 0) {
-							console.log("white can no longer castle.");
-							this.castling.wlong = false;
-							this.castling.wshort = false;
-						} else if (
-							this.storedTile.piece.player === "b" &&
-							data.y === 7
-						) {
-							console.log("black can no longer castle.");
-							this.castling.blong = false;
-							this.castling.bshort = false;
-						}
-					}
-				}
-				break;
-			case "bishop":
-				{
-					let a =
-						data.x2 >= data.x ? data.x2 - data.x : data.x - data.x2;
-					let b =
-						data.y2 >= data.y ? data.y2 - data.y : data.y - data.y2;
-
-					if (a === b) {
-						correctDirection = true;
-						// eg: if dir is positive, data.x axis goes up by 1 in the tile check
-						let dirx = data.x2 > data.x ? 1 : -1;
-						let diry = data.y2 > data.y ? 1 : -1;
-
-						for (let c = 1; c < a; c++) {
-							let tilex = data.x + c * dirx;
-							let tiley = data.y + c * diry;
-							if (this.findTile(tilex, tiley).piece.value !== 0) {
-								pieceInTheWay = true;
-							}
-						}
-					}
-
-					if (!pieceInTheWay && correctDirection) {
-						if (
-							newLocation.piece.player !== this.storedTile.piece.player
-						) {
-							data.moves.push([data.x2, data.y2, 0]);
-						}
-					}
-				}
-				break;
-			case "queen":
-				{
-					let a =
-						data.x2 >= data.x ? data.x2 - data.x : data.x - data.x2;
-					let b =
-						data.y2 >= data.y ? data.y2 - data.y : data.y - data.y2;
-
-					// literally just data.moves like bishop and rook
-					if (data.y === data.y2) {
-						// horizontal
-						correctDirection = true;
-						min = data.x < data.x2 ? data.x + 1 : data.x2 + 1;
-						max = data.x < data.x2 ? data.x2 - 1 : data.x - 1;
-						for (let c = min; c <= max; c++) {
-							if (this.findTile(c, data.y).piece.value !== 0) {
-								pieceInTheWay = true;
-							}
-						}
-					} else if (data.x === data.x2) {
-						// vertical
-						correctDirection = true;
-						min = data.y < data.y2 ? data.y + 1 : data.y2 + 1;
-						max = data.y < data.y2 ? data.y2 - 1 : data.y - 1;
-						for (let c = min; c <= max; c++) {
-							if (this.findTile(data.x, c).piece.value !== 0) {
-								pieceInTheWay = true;
-							}
-						}
-					} else if (a === b) {
-						// diagonal
-						correctDirection = true;
-						// eg: if dir is positive, data.x axis goes up by 1 in the tile check
-						let dirx = data.x2 > data.x ? 1 : -1;
-						let diry = data.y2 > data.y ? 1 : -1;
-
-						for (let c = 1; c < a; c++) {
-							let tilex = data.x + c * dirx;
-							let tiley = data.y + c * diry;
-							if (this.findTile(tilex, tiley).piece.value !== 0) {
-								pieceInTheWay = true;
-							}
-						}
-					}
-
-					if (!pieceInTheWay && correctDirection) {
-						if (
-							newLocation.piece.player !== this.storedTile.piece.player
-						) {
-							data.moves.push([data.x2, data.y2, 0]);
-						}
-					}
-				}
-				break;
-		}
-
-		return data;
-	}
-	private checkTilePawn(x: number, y: number): boolean {
-		// Used to check if a tile is empty, or if there is a piece that the opposing player owns
-		let valid = false;
-		// if the tile has a piece in it, it is not valid.
-		let tile = this.findTile(x, y);
-		if (
-			tile.piece.value === 0 &&
-			tile.piece.player !== this.storedTile.piece.player
-		) {
-			valid = true;
-		}
 
 		return valid;
 	}
@@ -956,14 +952,22 @@ export class ChessComponent {
 			case "location":
 				if (tile.piece.player !== this.currentPlayer) {
 					this.selectLocation(tile);
-				} else if (tile.piece.player === this.currentPlayer && tile.key !== this.storedTile.key) {
-					console.log("keys man")
-					
 				} else {
-					this.selectTile(tile);
+					console.log(tile.piece.key, this.storedTile.piece.key)
+					
+					if (tile.piece.key !== this.storedTile.piece.key){
+						this.selectTile(tile);
+
+					} else {
+						this.step = "piece";
+					}
+					
 				}
-				// else {
-				// 	this.selectPiece(tile);
+				// else if (tile.piece.player === this.currentPlayer && tile.key !== this.storedTile.key) {
+				// 	console.log("keys man")
+					
+				// } else {
+				// 	this.selectTile(tile);
 				// }
 				break;
 			default:
@@ -1006,7 +1010,6 @@ export class ChessComponent {
 			this.selectTile(tile);
 		// }
 	}
-
 	public pieceDropped(tile: Tile) {
 		if (this.storedTile.piece.player !== "" && this.storedTile.piece.player !== tile.piece.player) {
 			this.selectLocation(tile);

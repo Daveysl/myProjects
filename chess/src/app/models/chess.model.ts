@@ -15,6 +15,7 @@ export interface Piece {
     abbr:   string;
     value:  number;
     player: string;
+    validMoves: number[][];
 }
 
 export interface ChessOptions {
@@ -49,11 +50,7 @@ export interface Move {
 }
 
 export interface ValidationData {
-    old: Tile;
-    new: Tile;
     moves: number[][];
-    x:     number;
-    y:     number;
     x2:    number;
     y2:    number;
     pV: number;

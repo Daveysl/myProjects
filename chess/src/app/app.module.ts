@@ -11,12 +11,11 @@ import { MatInputModule } from "@angular/material/input";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { FormsModule } from "@angular/forms";
 import {MatListModule} from '@angular/material/list';
-import { DropComponent } from './drop/drop.component';
 import { DragDropModule } from "@angular/cdk/drag-drop";
 
 
 @NgModule({
-  declarations: [AppComponent, ChessComponent, DropComponent],
+  declarations: [AppComponent, ChessComponent],
   imports: [
     BrowserModule,
     NoopAnimationsModule,

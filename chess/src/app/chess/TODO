@@ -5,6 +5,34 @@ BUGS
 FEATURES
 - simplify board creation 
 
+finding possible moves:
+
+for each Tile on the Board.
+get the Tile Piece data
+given the moveLogic of the Piece, go through each Tile on board.
+if Tile location from moveLogic is valid, add the location to the Piece array of validMoves
+
+when a TILE is selected, go through the array of validMoves and highlight each Tile location on the Board
+
+
+CURRENT LOGIC:
+--- Select Piece
+pieceClicked(key) {
+    tile = board.find(key),
+}
+selectTile(tile) {
+    storedTile.piece = tile.piec
+    select tile, 
+    change step to location
+    displayMoveableTiles()
+}
+
+--- Select Location
+pieceClicked(key) {
+    tile = board.find(key),
+}
+
+
 
 
 
