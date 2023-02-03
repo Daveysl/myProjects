@@ -20,7 +20,6 @@ $error: #f89496ff;
 $tile_light: #b8b5b1;
 // $tile_dark: #b58863;
 $tile_dark: #746e66;
-$tile_dark_shadow: #413d38c2;
 
 // SIZES
 $text_size_1: 0.3em;
@@ -31,7 +30,7 @@ $default_board_size: 500px;
 $spacing_1: 15px;
 $spacing_2: 10px;
 
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
 * {
 	font-family: "Open Sans", sans-serif;
 	box-sizing: border-box;
@@ -44,11 +43,11 @@ $spacing_2: 10px;
 	height: 100%;
 	background-color: $background_1;
 }
+
 h1 {
 	font-size: $heading_1;
 	padding: $spacing_2;
 	margin: 0;
-	font-weight: 700;
 }
 button {
 	border: none;
@@ -64,79 +63,51 @@ button {
 		background-color: $primary1;
 	}
 }
-.header {
-	background-color: $background_2;
-	color: $text_1;
-	padding-left: 10vw;
 
-	h1 {
-		padding: 10px;
-	}
-}
 .cdk-drag-preview {
+	width: 150%!important;
+	height: 150%!important;
 	.piece {
-		width: 100%;
-		height: 100%;
-		opacity: 1;
+		background: white;
+		width: 150%;
+		height: 150%;
+		opacity: 0.5;
 	}
 }
+
 .cdk-drag-placeholder {
+	position: fixed;
 	display: none;
 }
-// .cdk-drop-list-dragging {
-// 	background-color: $success!important;
-// }
-.drag-location {
-	background-color: #4d4dff !important;
+
+.cdk-drop-list-receiving {
+	background-color: $success;
 }
 
 #container {
-	width: 800px;
-	height: 100vh;
-	margin-left: 10vw;
 	color: $text_1;
-	display: flex;
-	flex-flow: row wrap;
-	align-content: flex-start;
-	align-items: stretch;
-	overflow: auto;
-
-	&::-webkit-scrollbar {
-		width: 14px;
-		cursor: pointer;
-
-		&-track {
-			background-color: $background_3;
-			cursor: pointer;
-		}
-		&-corner {
-			background-color: $background_3;
-		}
-		&-thumb {
-			background-color: $background_5;
-			&:hover {
-				background-color: $primary0;
-			}
-			&:active {
-				background-color: $primary1;
-			}
-		}
-	}
+	display: grid;
+	grid-template-columns: $default_board_size 280px;
+	grid-template-rows: $default_board_size 174px;
+	gap: $spacing_1;
+	padding-left: $spacing_1;
+	padding-top: $spacing_1;
 }
 
 #chess {
+	width: 100%;
+	height: 100%;
 	display: flex;
 	flex-direction: column;
-	margin-left: $spacing_1;
-	margin-top: $spacing_1;
+	position: relative;
 
 	h1 {
 		display: none;
 	}
 
 	.board {
-		width: 100%;
-		height: 100%;
+		width: $default_board_size;
+		height: $default_board_size;
 		display: flex;
 		flex-flow: row wrap;
 
@@ -149,17 +120,12 @@ button {
 
 			&__dark {
 				background-color: $tile_dark;
-				box-shadow: inset 2px 2px 3px 0px $tile_dark_shadow;
-				z-index: 10;
 			}
 
-			&__moveable {
-				background-color: $primary3;
-				cursor: pointer;
-			}
-			&__darkMovable {
-				background-color: $primary2;
-				box-shadow: inset 2px 2px 3px 0px $primary0;
+			&.moveable {
+				width: 30%;
+				height: 30%;
+				border-radius: 100%;
 				cursor: pointer;
 			}
 		}
@@ -184,49 +150,10 @@ button {
 	}
 }
 
-.coords{
-	
-
-	&__numbers {
-		width: 15px;
-		display: flex;
-		flex-direction: column-reverse;
-		margin-top: $spacing_1;
-		align-items: center;
-
-		div {
-			height: 12.5%;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-size: 12px;
-			color: $text_2;
-		}
-	}
-
-	&__letters {
-		height: 15px;
-		display: flex;
-		flex-direction: row;
-		margin-left: $spacing_1;
-		align-items: center;
-
-		div {
-			width: 12.5%;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-size: 12px;
-			color: $text_2;
-		}
-	}
-	
-}
-
 #sidebar {
+	width: 100%;
+	height: 100%;
 	background-color: $background_2;
-	width: 250px;
-	margin-top: $spacing_1;
 
 	h1 {
 		width: 100%;
@@ -244,10 +171,6 @@ button {
 			display: grid;
 			grid-template-columns: 30px calc(50% - 15px) calc(50% - 15px);
 			grid-auto-rows: 30px;
-
-			.current__move {
-				background-color: $primary1;
-			}
 
 			div {
 				display: flex;
@@ -267,13 +190,16 @@ button {
 					}
 				}
 			}
+			&:last-of-type div:last-of-type {
+				background-color: $primary1;
+			}
 		}
 	}
 }
 
 #settings {
+	width: 100%;
 	background-color: $background_2;
-	margin-left: $spacing_1;
 
 	.tab {
 		width: 100%;
@@ -304,16 +230,10 @@ button {
 			&::-webkit-scrollbar {
 				width: 10px;
 				&-track {
-					background-color: $background_3!important;
+					background-color: $background_3;
 				}
 				&-thumb {
-					background-color: $background_5!important;
-					&:hover {
-						background-color: $primary0!important;
-					}
-					&:active {
-						background-color: $primary1!important;
-					}
+					background-color: $background_5;
 				}
 			}
 
@@ -354,9 +274,8 @@ button {
 }
 
 #controls {
+	width: 100%;
 	background-color: $background_2;
-	width: 250px;
-	margin-left: $spacing_1;
 	.controls {
 		padding: $spacing_2;
 
@@ -365,25 +284,3 @@ button {
 		}
 	}
 }
-
-// @media only screen and (max-width: 800px) {
-//   #chess {
-//       width: 60vw;
-//       height: 60vw;
-//       padding: 0 20vw 0 20vw;
-//       flex-direction: column;
-//       justify-content: center;
-//     .board {
-//       width: 100%;
-//     }
-//     .sidebar {
-//       display: none;
-//     }
-
-//   }
-//   #options {
-//     width: 60vw;
-//     padding: 0 20vw 0 20vw;
-//     margin: 0;
-//   }
-// }

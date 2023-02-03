@@ -1,0 +1,40 @@
+<div class="background"></div>
+
+<div id="container">
+	<section id="chess">
+		<h1>Chess</h1>
+		<div class="board" cdkDropListGroup>
+			<div
+				class="tile"
+				*ngFor="let tile of board"
+				[ngClass]="{ tile__dark: tile.color }"
+				(mouseup)="pieceClicked(tile.key)"
+				
+				cdkDropList
+				cdkDropListSortingDisabled
+				(cdkDropListDropped)="pieceDropped($event)"
+				[cdkDropListData]="tile"
+
+			>
+				<div
+					class="piece_placeholder"
+					*ngIf="tile.piece.value !== 0"
+					
+					cdkDrag
+					
+				>
+					<img
+						class="piece"
+						[ngClass]="{ selected: tile.selected }"
+						src="../../assets/{{ this.options.pieceSet }}/{{
+							tile.piece.player + tile.piece.abbr.toUpperCase()
+						}}.svg"
+						alt="{{
+							tile.piece.player + tile.piece.abbr.toUpperCase()
+						}}"
+					/>
+				</div>
+			</div>
+		</div>
+	</section>
+</div>

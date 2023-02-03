@@ -1,28 +1,13 @@
-/**
- * Made by Sam Davey
- *
- *
- */
-
 import { Component } from "@angular/core";
-import {
-	Piece,
-	Tile,
-	ChessOptions,
-	Castling,
-	Move,
-	Turn,
-	ValidationData,
-} from "./chess.model";
-import { CdkDrag, CdkDragDrop } from "@angular/cdk/drag-drop";
-import { Title } from "@angular/platform-browser";
+import { CdkDragDrop } from "@angular/cdk/drag-drop";
+import { Piece, Tile, ChessOptions, Castling, Move, Turn } from "./chess.model";
 
 @Component({
-	selector: "app-chess",
-	templateUrl: "./chess.component.html",
-	styleUrls: ["./chess.component.scss"],
+	selector: "app-drop",
+	templateUrl: "./drop.component.html",
+	styleUrls: ["./drop.component.scss"],
 })
-export class ChessComponent {
+export class DropComponent {
 	public pieces: Piece[] = [
 		{
 			key: null, // ID of tile
@@ -124,7 +109,6 @@ export class ChessComponent {
 
 	public DEFAULT_THEMES: string[] = [
 		"theme1",
-		"theme2",
 		"alpha",
 		"california",
 		"cardinal",
@@ -155,10 +139,8 @@ export class ChessComponent {
 		"tatiana",
 	];
 	public optionsList: string[] = ["Piece Set", "FEN"];
-	public options: ChessOptions;
 
-	public boardSize: number;
-	public mouseLoc: number[];
+	public options: ChessOptions;
 
 	public board: Tile[] = [];
 	private boardState: number[];
@@ -168,7 +150,6 @@ export class ChessComponent {
 	private castling: Castling;
 	private currentPlayer: string;
 	private stage: string;
-	private turnHistory: Turn[];
 
 	constructor() {
 		this.initBoardState();
@@ -209,7 +190,7 @@ export class ChessComponent {
 					x: x,
 					y: y,
 					selected: false,
-					enpassantable: false,
+					enpassant: false,
 					moveable: false,
 				};
 
@@ -223,10 +204,6 @@ export class ChessComponent {
 		this.storedPiece = this.createNullPiece(null);
 		this.currentPlayer = "w";
 		this.stage = "piece";
-		this.boardSize = 500;
-
-		// Arrays
-		this.turnHistory = [];
 
 		// Objects
 		this.castling = {
@@ -258,21 +235,12 @@ export class ChessComponent {
 	}
 	private initMove(): Move {
 		return {
-			turnNum: 0,
 			piece: this.createNullPiece(null),
 			capturing: false,
 			past: [],
 			new: [],
 			notation: "",
 			fenState: "",
-			current: false,
-		};
-	}
-	private createNewTurn(): Turn {
-		return {
-			num: this.turnHistory.length + 1,
-			white: this.initMove(),
-			black: this.initMove(),
 		};
 	}
 	private createNullPiece(key: number) {
@@ -292,7 +260,6 @@ export class ChessComponent {
 			this.storedPiece = tile.piece;
 			tile.selected = true;
 			this.stage = "location";
-			this.displayMoveableTiles();
 		}
 	}
 	private selectLocation(location: Tile): void {
@@ -300,9 +267,9 @@ export class ChessComponent {
 			location.key !== this.storedPiece.key &&
 			location.piece.player !== this.storedPiece.player
 		) {
-			if (this.validateMove(location, false)) {
+			if (this.validateMove(location)) {
 				console.log("move is valid");
-				this.movePiece(location, 1);
+				this.movePiece(location, false);
 			} else {
 				console.log("This is not a valid move");
 				this.storedPiece = this.createNullPiece(null);
@@ -310,9 +277,11 @@ export class ChessComponent {
 			}
 		} else if (location.piece.player === this.storedPiece.player) {
 			if (location.piece.key === this.storedPiece.key) {
+        console.log("what")
 				location.selected = false;
 				this.stage = "piece";
 			} else {
+        console.log("what")
 				this.selectPiece(location);
 			}
 		} else {
@@ -324,12 +293,9 @@ export class ChessComponent {
 			}
 		}
 	}
-	private movePiece(location: Tile, code: number): void {
+	private movePiece(location: Tile, castled: boolean): void {
 		let piece = this.storedPiece;
 		let capturing = location.piece.value !== 0 ? true : false;
-		if (code === 3) {
-			capturing = true;
-		}
 		let move = this.createMove(this.board[piece.key], location, capturing);
 
 		// change location's piece to selected piece
@@ -343,14 +309,8 @@ export class ChessComponent {
 
 		// record move
 		this.updateFenValue();
-		this.turnHistory.forEach((turn) => {
-			turn.white.current = false;
-			turn.black.current = false;
-		});
 		move.fenState = this.options.fenValue;
 		move.notation = this.createNotation(move);
-		move.current = true;
-		this.setTurn(move);
 
 		// Clearup Loop ----------------------------------------------
 		this.board.forEach((tile) => {
@@ -359,226 +319,188 @@ export class ChessComponent {
 		});
 		// erase the piece from storage
 		this.storedPiece = this.createNullPiece(null);
-		if (code !== 2) {
+		if (!castled) {
 			this.currentPlayer = this.currentPlayer == "w" ? "b" : "w";
 		}
 
 		this.stage = "piece";
 	}
-	private validateMove(
-		newLocation: Tile,
-		checkingAvailableMoves: boolean
-	): boolean {
-		let valid: boolean = false;
-
-		let data: ValidationData = this.defineValidationData(
-			this.board[this.storedPiece.key],
-			newLocation
-		);
-
-		data.moves.forEach((move) => {
-			if (
-				this.board[newLocation.piece.key].piece.player !==
-				this.currentPlayer
-			) {
-				if (move[0] === data.x2 && move[1] === data.y2) {
-					valid = true;
-					if (!checkingAvailableMoves) {
-						this.board.forEach((tile) => {
-							tile.enpassantable = false;
-						});
-
-						// if move was a double pawn move, and it's not just doing a move display
-						if (move[2] === 1) {
-							// aha! a sneaky double move... if only if there was a way to do something about this!!!!!!!
-							let doubleMovedPawn = this.findTile(data.x2, data.y2 - 1*data.pV);
-							doubleMovedPawn.enpassantable = true;
-						} else if (move[2] === 2) {
-							let victim = this.findTile(data.x2, data.y2 - 1*data.pV);
-							this.board[victim.key].piece = this.createNullPiece(this.board[victim.piece.key].key);
-						}
-					}
-				}
-			}
-		});
-
-		return valid;
+	private castleAction(pY: number, rX: number, rX2: number): void {
+		console.log("rX,rX2:" + rX, rX2);
+		let saveTheStoredPiece = this.storedPiece;
+		this.storedPiece = this.findTile(rX, pY).piece;
+		this.movePiece(this.findTile(rX2, pY), true);
+		this.storedPiece = saveTheStoredPiece;
 	}
 
-	private defineValidationData(
-		pastLocation: Tile,
-		newLocation: Tile
-	): ValidationData {
-		let white: boolean = this.storedPiece.player === "w" ? true : false;
+	private validateMove(newLocation: Tile): boolean {
+		// DECLARE VARIABLES --------------------------------------------------------------
+		let isValid: boolean = false; // is the move valid?
+		let moves: number[][] = []; // possible moves
+
+		let piece: Piece = this.storedPiece; // stored piece
+		let pastLocation: Tile = this.board[this.storedPiece.key]; // tile on board
+		let white: boolean = piece.player === "w" ? true : false; // is the piece white?
+
+		let x: number = pastLocation.x; // old location row
+		let y: number = pastLocation.y; // old location col
+
+		let x2: number = newLocation.x; // new location row
+		let y2: number = newLocation.y; // new location col
+
+		// pawn
+		// starting row 2 or 7 based on player
 		let startrow: number = white ? 1 : 6;
-		let playerValue = white ? 1 : -1;
-
-		let data = {
-			old: pastLocation,
-			new: newLocation,
-			moves: [],
-			x: pastLocation.x,
-			y: pastLocation.y,
-			x2: newLocation.x,
-			y2: newLocation.y,
-			pV: playerValue,
-		};
-
-		let correctDirection = false;
+		// playerValue turns number negative if piece is not white
+		let playerValue: number = white ? 1 : -1;
 		let pieceInTheWay = false;
 		let min = 0;
 		let max = 0;
-
+		let valid = false;
 		// PIECES -------------------------------------
 		// picking a location to move
-		switch (this.storedPiece.name) {
+		switch (piece.name) {
 			case "pawn":
 				{
 					// 1 - single move
-					if (this.checkTilePawn(data.x, data.y + 1 * playerValue)) {
-						data.moves.push([data.x, data.y + 1 * playerValue, 0]);
+					if (this.checkTile(x, y + 1 * playerValue)) {
+						moves.push([x, y + 1 * playerValue]);
 
 						// 2 - double move
 						// must be previously unmoved (on its starting row)
 						if (
-							this.checkTilePawn(
-								data.x,
-								data.y + 2 * playerValue
-							) &&
-							data.y === startrow
+							this.checkTile(x, y + 2 * playerValue) &&
+							y === startrow
 						) {
-							data.moves.push([
-								data.x,
-								data.y + 2 * playerValue,
-								1,
-							]);
+							moves.push([x, y + 2 * playerValue]);
 						}
 					}
 
-					// 3 - capturing Piece
+					// 3 - capturing piece
 					if (
 						newLocation.piece.value !== 0 &&
 						newLocation.piece.player !== this.storedPiece.player
 					) {
-						data.moves.push(
-							[data.x + 1, data.y + 1 * playerValue, 0],
-							[data.x - 1, data.y + 1 * playerValue, 0]
+						moves.push(
+							[x + 1, y + 1 * playerValue],
+							[x - 1, y + 1 * playerValue]
 						);
 					}
 
-					// 4 - en passanting Piece
+					// 4 - en passanting piece
 					let victim = this.board.find(
-						(tile) => tile.enpassantable === true
+						(tile) => tile.enpassant === true
 					);
 					if (victim) {
-						// console.log(data.x2, data.y2)
-						// console.log(victim.x, victim.y)
-						if (
-							victim.y === data.y + 1 * playerValue &&
-							(victim.x === data.x + 1 || victim.x === data.x - 1)
-						) {
-							data.moves.push([victim.x, victim.y, 2]);
+						this.board.forEach((tile) => {
+							tile.enpassant = false;
+						});
+
+						if (victim.piece.player !== piece.player) {
+							if (victim.y === y) {
+								if (victim.x === x + 1) {
+									moves.push([x + 1, y + 1 * playerValue]);
+									victim.piece = victim.piece = this.createNullPiece(victim.key);
+								} else if (victim.x === x - 1) {
+									moves.push([x - 1, y + 1 * playerValue]);
+									victim.piece = victim.piece = this.createNullPiece(victim.key);
+								}
+							}
 						}
 					}
 				}
 				break;
 			case "knight":
 				{
-					data.moves.push(
-						[data.x + 1, data.y + 2, 0],
-						[data.x - 1, data.y + 2, 0],
-						[data.x - 1, data.y - 2, 0],
-						[data.x + 1, data.y - 2, 0],
-						[data.x + 2, data.y + 1, 0],
-						[data.x - 2, data.y + 1, 0],
-						[data.x - 2, data.y - 1, 0],
-						[data.x + 2, data.y - 1, 0]
+					moves.push(
+						[x + 1, y + 2],
+						[x - 1, y + 2],
+						[x - 1, y - 2],
+						[x + 1, y - 2],
+						[x + 2, y + 1],
+						[x - 2, y + 1],
+						[x - 2, y - 1],
+						[x + 2, y - 1]
 					);
 				}
 				break;
 			case "rook":
 				{
-					// have to see if a Piece is in the way
-					// 1. loop through each tile in the row away from Piece until it reaches the board end
-					// 2. if a tile has a Piece and the Piece is not the new location, flag
-					// if y1 is the same as data.y2: horizontal (only data.x is changing)
+					// have to see if a piece is in the way
+					// 1. loop through each tile in the row away from piece until it reaches the board end
+					// 2. if a tile has a piece and the piece is not the new location, flag
+					// if y1 is the same as y2: horizontal (only x is changing)
 
-					if (data.y === data.y2) {
+					if (y === y2) {
 						// horizontal
-						// console.log("horizontal");
-						correctDirection = true;
-						min = data.x < data.x2 ? data.x + 1 : data.x2 + 1;
-						max = data.x < data.x2 ? data.x2 - 1 : data.x - 1;
-						// console.log("max:" + max, "min:" + min);
+						console.log("horizontal");
+						valid = true;
+						min = x < x2 ? x + 1 : x2 + 1;
+						max = x < x2 ? x2 - 1 : x - 1;
+						console.log("max:" + max, "min:" + min);
 						for (let c = min; c <= max; c++) {
-							// console.log(this.findLetter(c), data.y + 1);
+							console.log(this.findLetter(c), y + 1);
 
-							if (this.findTile(c, data.y).piece.value !== 0) {
-								// console.log(
-								// 	`Piece on ${data.x2},${data.y2} is in the way!`
-								// );
+							if (this.findTile(c, y).piece.value !== 0) {
+								console.log("piece detected");
 								pieceInTheWay = true;
 							}
 						}
-					} else if (data.x === data.x2) {
+					} else if (x === x2) {
 						// vertical
-						// console.log("vertical");
-						correctDirection = true;
-						min = data.y < data.y2 ? data.y + 1 : data.y2 + 1;
-						max = data.y < data.y2 ? data.y2 - 1 : data.y - 1;
-						// console.log("max:" + max, "min:" + min);
+						console.log("vertical");
+						valid = true;
+						min = y < y2 ? y + 1 : y2 + 1;
+						max = y < y2 ? y2 - 1 : y - 1;
+						console.log("max:" + max, "min:" + min);
 						for (let c = min; c <= max; c++) {
-							// console.log(this.findLetter(data.x), c + 1);
+							console.log(this.findLetter(x), c + 1);
 
-							if (this.findTile(data.x, c).piece.value !== 0) {
+							if (this.findTile(x, c).piece.value !== 0) {
+								console.log("piece detected");
 								pieceInTheWay = true;
-								// console.log(
-								// 	`Piece on ${this.letters[data.x2]},${
-								// 		data.y2 + 1
-								// 	} is in the way!`
-								// );
 							}
 						}
 					}
 
-					if (!pieceInTheWay && correctDirection) {
+					if (!pieceInTheWay && valid) {
 						if (
 							newLocation.piece.player !== this.storedPiece.player
 						) {
-							data.moves.push([data.x2, data.y2, 0]);
+							moves.push([x2, y2]);
 
 							// castling functionality
-							if (this.storedPiece.player === "w") {
-								if (data.y === 0) {
-									if (data.x === 0 && this.castling.wlong) {
-										// console.log(
-										// 	"white can no longer castle long."
-										// );
+							if (piece.player === "w") {
+								if (y === 0) {
+									if (x === 0 && this.castling.wlong) {
+										console.log(
+											"white can no longer castle long."
+										);
 										this.castling.wlong = false;
 									} else if (
-										data.x === 7 &&
+										x === 7 &&
 										this.castling.wshort
 									) {
-										// console.log(
-										// 	"white can no longer castle short."
-										// );
+										console.log(
+											"white can no longer castle short."
+										);
 										this.castling.wshort = false;
 									}
 								}
 							} else {
-								if (data.y === 7) {
-									if (data.x === 0 && this.castling.blong) {
-										// console.log(
-										// 	"black can no longer castle long."
-										// );
+								if (y === 7) {
+									if (x === 0 && this.castling.blong) {
+										console.log(
+											"black can no longer castle long."
+										);
 										this.castling.blong = false;
 									} else if (
-										data.x === 7 &&
+										x === 7 &&
 										this.castling.bshort
 									) {
-										// console.log(
-										// 	"black can no longer castle short."
-										// );
+										console.log(
+											"black can no longer castle short."
+										);
 										this.castling.bshort = false;
 									}
 								}
@@ -589,33 +511,33 @@ export class ChessComponent {
 				break;
 			case "king":
 				{
-					data.moves.push(
-						[data.x + 1, data.y + 1, 0],
-						[data.x - 1, data.y + 1, 0],
-						[data.x + 1, data.y - 1, 0],
-						[data.x - 1, data.y - 1, 0],
-						[data.x + 1, data.y, 0],
-						[data.x - 1, data.y, 0],
-						[data.x, data.y + 1, 0],
-						[data.x, data.y - 1, 0]
+					moves.push(
+						[x + 1, y + 1],
+						[x - 1, y + 1],
+						[x + 1, y - 1],
+						[x - 1, y - 1],
+						[x + 1, y],
+						[x - 1, y],
+						[x, y + 1],
+						[x, y - 1]
 					);
 
 					// add castling moves
 					let pY = 0; // player Y coord
 					let cD = ""; // castling Direction
 
-					if (this.storedPiece.player === "w") {
+					if (piece.player === "w") {
 						pY = 0;
-						if (data.x2 === 6 && this.castling.wshort) {
+						if (x2 === 6 && this.castling.wshort) {
 							cD = "short";
-						} else if (data.x2 === 2 && this.castling.wlong) {
+						} else if (x2 === 2 && this.castling.wlong) {
 							cD = "long";
 						}
-					} else if (this.storedPiece.player === "b") {
+					} else if (piece.player === "b") {
 						pY = 7;
-						if (data.x2 === 6 && this.castling.bshort) {
+						if (x2 === 6 && this.castling.bshort) {
 							cD = "short";
-						} else if (data.x2 === 2 && this.castling.blong) {
+						} else if (x2 === 2 && this.castling.blong) {
 							cD = "long";
 						}
 					}
@@ -625,27 +547,24 @@ export class ChessComponent {
 						this.findTile(6, pY).piece.value === 0 &&
 						cD === "short"
 					) {
-						data.moves.push([data.x + 2, data.y, 0]);
+						moves.push([x + 2, y]);
 						this.castleAction(pY, 7, 5);
 					} else if (
 						this.findTile(2, pY).piece.value === 0 &&
 						this.findTile(3, pY).piece.value === 0 &&
 						cD === "long"
 					) {
-						data.moves.push([data.x - 2, data.y, 0]);
+						moves.push([x - 2, y]);
 						this.castleAction(pY, 0, 3);
 					}
 
-					// break castle function if king data.moves
-					if (data.x === 4) {
-						if (this.storedPiece.player === "w" && data.y === 0) {
+					// break castle function if king moves
+					if (x === 4) {
+						if (piece.player === "w" && y === 0) {
 							console.log("white can no longer castle.");
 							this.castling.wlong = false;
 							this.castling.wshort = false;
-						} else if (
-							this.storedPiece.player === "b" &&
-							data.y === 7
-						) {
+						} else if (piece.player === "b" && y === 7) {
 							console.log("black can no longer castle.");
 							this.castling.blong = false;
 							this.castling.bshort = false;
@@ -655,93 +574,130 @@ export class ChessComponent {
 				break;
 			case "bishop":
 				{
-					let a =
-						data.x2 >= data.x ? data.x2 - data.x : data.x - data.x2;
-					let b =
-						data.y2 >= data.y ? data.y2 - data.y : data.y - data.y2;
+					let a = x2 >= x ? x2 - x : x - x2;
+					let b = y2 >= y ? y2 - y : y - y2;
 
 					if (a === b) {
-						correctDirection = true;
-						// eg: if dir is positive, data.x axis goes up by 1 in the tile check
-						let dirx = data.x2 > data.x ? 1 : -1;
-						let diry = data.y2 > data.y ? 1 : -1;
+						valid = true;
+						// eg: if dir is positive, x axis goes up by 1 in the tile check
+						let dirx = x2 > x ? 1 : -1;
+						let diry = y2 > y ? 1 : -1;
 
 						for (let c = 1; c < a; c++) {
-							let tilex = data.x + c * dirx;
-							let tiley = data.y + c * diry;
+							let tilex = x + c * dirx;
+							let tiley = y + c * diry;
 							if (this.findTile(tilex, tiley).piece.value !== 0) {
 								pieceInTheWay = true;
+								console.log(
+									`piece on ${tilex},${tiley} is in the way!`
+								);
 							}
 						}
 					}
 
-					if (!pieceInTheWay && correctDirection) {
+					if (!pieceInTheWay && valid) {
 						if (
 							newLocation.piece.player !== this.storedPiece.player
 						) {
-							data.moves.push([data.x2, data.y2, 0]);
+							moves.push([x2, y2]);
 						}
 					}
 				}
 				break;
 			case "queen":
 				{
-					let a =
-						data.x2 >= data.x ? data.x2 - data.x : data.x - data.x2;
-					let b =
-						data.y2 >= data.y ? data.y2 - data.y : data.y - data.y2;
+					let a = x2 >= x ? x2 - x : x - x2;
+					let b = y2 >= y ? y2 - y : y - y2;
 
-					// literally just data.moves like bishop and rook
-					if (data.y === data.y2) {
+					// literally just moves like bishop and rook
+					if (y === y2) {
 						// horizontal
-						correctDirection = true;
-						min = data.x < data.x2 ? data.x + 1 : data.x2 + 1;
-						max = data.x < data.x2 ? data.x2 - 1 : data.x - 1;
+						console.log("moving horizontal");
+						valid = true;
+						min = x < x2 ? x + 1 : x2 + 1;
+						max = x < x2 ? x2 - 1 : x - 1;
 						for (let c = min; c <= max; c++) {
-							if (this.findTile(c, data.y).piece.value !== 0) {
+							console.log(this.findLetter(c), y);
+							if (this.findTile(c, y).piece.value !== 0) {
+								console.log(
+									`piece on ${c},${y} is in the way!`
+								);
 								pieceInTheWay = true;
 							}
 						}
-					} else if (data.x === data.x2) {
+					} else if (x === x2) {
 						// vertical
-						correctDirection = true;
-						min = data.y < data.y2 ? data.y + 1 : data.y2 + 1;
-						max = data.y < data.y2 ? data.y2 - 1 : data.y - 1;
+						console.log("moving vertical");
+						valid = true;
+						min = y < y2 ? y + 1 : y2 + 1;
+						max = y < y2 ? y2 - 1 : y - 1;
 						for (let c = min; c <= max; c++) {
-							if (this.findTile(data.x, c).piece.value !== 0) {
+							console.log(this.findLetter(x), c);
+							if (this.findTile(x, c).piece.value !== 0) {
+								console.log(
+									`piece on ${x},${c} is in the way!`
+								);
 								pieceInTheWay = true;
 							}
 						}
 					} else if (a === b) {
-						// diagonal
-						correctDirection = true;
-						// eg: if dir is positive, data.x axis goes up by 1 in the tile check
-						let dirx = data.x2 > data.x ? 1 : -1;
-						let diry = data.y2 > data.y ? 1 : -1;
+						console.log("moving diagonally");
+						valid = true;
+						// eg: if dir is positive, x axis goes up by 1 in the tile check
+						let dirx = x2 > x ? 1 : -1;
+						let diry = y2 > y ? 1 : -1;
 
 						for (let c = 1; c < a; c++) {
-							let tilex = data.x + c * dirx;
-							let tiley = data.y + c * diry;
+							let tilex = x + c * dirx;
+							let tiley = y + c * diry;
 							if (this.findTile(tilex, tiley).piece.value !== 0) {
 								pieceInTheWay = true;
+								console.log(
+									`piece on ${tilex},${tiley} is in the way!`
+								);
 							}
 						}
 					}
 
-					if (!pieceInTheWay && correctDirection) {
+					if (!pieceInTheWay && valid) {
 						if (
 							newLocation.piece.player !== this.storedPiece.player
 						) {
-							data.moves.push([data.x2, data.y2, 0]);
+							moves.push([x2, y2]);
 						}
 					}
 				}
 				break;
 		}
+		/**
+		 * Moves Loop
+		 * go through each possible move and see if the new location matches
+		 * console.log(moves);
+		 */
 
-		return data;
+		moves.forEach((move) => {
+			// console.log(this.getLetter(move[0]) + (move[1]+1));
+
+			// EN PASSANT - if a pawn completed a special 2 move , temporarily declare it as enpassantable to possible attackers
+			// - reusing a pawn variable to turn negative or positive based on player
+			if (
+				y2 === y + 2 * playerValue &&
+				!newLocation.enpassant &&
+				piece.name === "pawn"
+			) {
+				console.log(this.findLetter(x2) + (y2 + 1), "is enpassantable");
+				newLocation.enpassant = true;
+			}
+
+			// FIND MOVE --------------------------
+			// if the move[x,y] matches the new location x,y
+			if (move[0] === x2 && move[1] === y2) {
+				isValid = true;
+			}
+		});
+		return isValid;
 	}
-	private checkTilePawn(x: number, y: number): boolean {
+	private checkTile(x: number, y: number): boolean {
 		// Used to check if a tile is empty, or if there is a piece that the opposing player owns
 		let valid = false;
 		// if the tile has a piece in it, it is not valid.
@@ -756,25 +712,6 @@ export class ChessComponent {
 		return valid;
 	}
 
-	private castleAction(pY: number, rX: number, rX2: number): void {
-		console.log("rX,rX2:" + rX, rX2);
-		let saveTheStoredPiece = this.storedPiece;
-		this.storedPiece = this.findTile(rX, pY).piece;
-		this.movePiece(this.findTile(rX2, pY), 2);
-		this.storedPiece = saveTheStoredPiece;
-	}
-
-	private displayMoveableTiles(): void {
-		this.board.forEach((tile) => {
-			if (this.validateMove(tile, true)) {
-				tile.moveable = true;
-			}
-			if (tile.enpassantable) {
-				console.log("blah");
-			}
-		});
-	}
-
 	// Search Methods
 	private findAbbr(value: number): string {
 		return this.pieces[value].abbr;
@@ -785,8 +722,11 @@ export class ChessComponent {
 	private findLetter(x: number): string {
 		return this.letters[x];
 	}
-	private findPieceFromChar(char: string): Piece {
+	private findPieceFromChar(char: string, key: number): Piece {
+		// console.log(char)
+		// console.log(this.pieces.find(piece => piece.abbr == char))
 		let piece = this.pieces.find((piece) => piece.abbr == char);
+		// console.log(piece);
 		// return this.pieces.find(piece => {piece.abbr == char})
 		return piece;
 		// return piece;
@@ -816,25 +756,9 @@ export class ChessComponent {
 		} else {
 			note = pieceAbbr === "P" ? newCoord : pieceAbbr + newCoord;
 		}
-		return note;
-	}
-	private setTurn(move: Move): void {
-		// console.log("move: ", move.current)
-		let turn =
-			this.currentPlayer === "w"
-				? this.createNewTurn()
-				: this.turnHistory[this.turnHistory.length - 1];
 
-		if (this.currentPlayer === "w") {
-			turn.white = move;
-			turn.white.turnNum = turn.num;
-			this.turnHistory.push(turn);
-			// console.log(this.turnHistory);
-		} else {
-			turn.black = move;
-			turn.black.turnNum = turn.num;
-			// console.log(this.turnHistory);
-		}
+		console.log("note", note);
+		return note;
 	}
 	private updateFenValue(): void {
 		let string: string = "";
@@ -865,6 +789,7 @@ export class ChessComponent {
 		let fenArray: string[] = [];
 
 		fen.split("/").forEach((row, i) => {
+			// console.log(row);
 			if (i === 7) {
 				let info = row.split(" ");
 				// console.log(info);
@@ -884,7 +809,7 @@ export class ChessComponent {
 			});
 		});
 		for (let i = 0; i < 64; i++) {
-			let newPiece = this.findPieceFromChar(fenArray[i]);
+			let newPiece = this.findPieceFromChar(fenArray[i], i);
 			this.board[i].piece.abbr = newPiece.abbr;
 			this.board[i].piece.name = newPiece.name;
 			this.board[i].piece.player = newPiece.player;
@@ -897,6 +822,7 @@ export class ChessComponent {
 		 * 1. Fen must have length of 8 sections seperated by '/', then a 9th one containing Fen metadata.
 		 * 2. Each section can only contain letters 'pnbrqk or PNBRQK or empty'
 		 * 3. Each section must be 8 characters long
+		 *
 		 */
 
 		if (fen.split("/").length !== 8) {
@@ -908,14 +834,13 @@ export class ChessComponent {
 	// Event Listeners
 	public onFenValueChange(value: string): void {
 		if (this.validateFenValue(value)) {
-			// console.log(value);
+			console.log(value);
 
 			this.importFenValue(value);
 			this.options.fenValue = value;
 		}
 	}
-	public pieceClicked(event: MouseEvent, key: number): void {
-		this.mouseLoc = [event.clientX, event.clientY]
+	public pieceClicked(key: number): void {
 		// INIT
 		let tile = this.board.find((tile) => tile.key === key);
 		this.board.forEach((tile) => {
@@ -923,7 +848,19 @@ export class ChessComponent {
 			tile.moveable = false;
 		});
 		console.log("tile:", this.findLetter(tile.x) + (tile.y + 1));
-		// console.log(this.mouseLoc);
+		/*
+      STAGES:
+      1. Select piece
+      2. Error check
+      3. Select Location
+      4. Error check
+      5. Remove past piece and insert into location
+      6. Change turn to other player
+    
+      2 clicks: 
+      1st must be your own piece, 
+      2nd must be an empty tile or an opponent's piece
+    */
 
 		switch (this.stage) {
 			case "piece":
@@ -937,45 +874,13 @@ export class ChessComponent {
 				break;
 		}
 	}
-	public changeSet(theme: string): void {
-		this.options.pieceSet = theme;
-		console.log("theme is", theme);
-	}
-	public openTab(tab: string) {
-		this.options.display = tab;
-	}
-	public getPast(move: Move) {
-		this.turnHistory.forEach((turn) => {
-			turn.white.current = false;
-			turn.black.current = false;
-		});
-		console.log(move.fenState);
-		this.options.fenValue = move.fenState;
-		this.importFenValue(move.fenState);
 
-		if (move.piece.player === "w") {
-			this.turnHistory[move.turnNum - 1].white.current = true;
-			this.currentPlayer = "b";
-			this.turnHistory.splice(move.turnNum);
-			this.turnHistory[move.turnNum - 1].black = this.initMove();
-		} else {
-			this.turnHistory[move.turnNum - 1].black.current = true;
-			this.currentPlayer = "w";
-			this.turnHistory.splice(move.turnNum);
-		}
+	public pieceDropped(event: CdkDragDrop<Tile>) {
+		console.log(event.container);
+		console.log(event.item);
+		
+    	this.selectPiece(event.previousContainer.data);
+    	this.selectLocation(event.container.data);
+    	// this.movePiece(event.container.data, false);
 	}
-
-	public piecePickedUp(event: CdkDrag<Tile>, tile: Tile) {
-    // // console.log(tile);
-		// if (this.storedPiece.player === "") {
-			console.log(event._dragRef, event);
-			this.selectPiece(tile);
-		// }
-	}
-
-	public pieceDropped(tile: Tile) {
-		if (this.storedPiece.player !== "" && this.storedPiece.player !== tile.piece.player) {
-			this.selectLocation(tile);
-		}
-	}
-} // ENDING BRACE
+}
