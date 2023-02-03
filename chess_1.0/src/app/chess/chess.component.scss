@@ -1,0 +1,389 @@
+// COLORS
+$background_1: rgb(18, 19, 22);
+$background_2: rgb(43, 45, 47);
+$background_3: rgb(50, 50, 54);
+$background_4: rgb(56, 58, 60);
+$background_5: rgb(73, 75, 77);
+
+$text_1: #f0f0f0;
+$text_2: #f0f0f0cb;
+
+$primary0: #1648adce;
+$primary1: #2f70e0;
+$primary2: #6099fc;
+$primary3: #a4c6ff;
+
+$success: #befd9dff;
+$error: #f89496ff;
+
+// $tile_light: #f0d9b5;
+$tile_light: #b8b5b1;
+// $tile_dark: #b58863;
+$tile_dark: #746e66;
+$tile_dark_shadow: #413d38c2;
+
+// SIZES
+$text_size_1: 0.3em;
+$heading_1: 1.1em;
+$heading_2: 1.1em;
+
+$default_board_size: 500px;
+$spacing_1: 15px;
+$spacing_2: 10px;
+
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap");
+* {
+	font-family: "Open Sans", sans-serif;
+	box-sizing: border-box;
+}
+
+.background {
+	position: absolute;
+	z-index: -10;
+	width: 100%;
+	height: 100%;
+	background-color: $background_1;
+}
+h1 {
+	font-size: $heading_1;
+	padding: $spacing_2;
+	margin: 0;
+	font-weight: 700;
+}
+button {
+	border: none;
+	padding: 5px;
+	margin: 0;
+	color: $text_1;
+	background-color: $background_3;
+
+	&:hover {
+		cursor: pointer;
+	}
+	&:active {
+		background-color: $primary1;
+	}
+}
+.header {
+	background-color: $background_2;
+	color: $text_1;
+	padding-left: 10vw;
+
+	h1 {
+		padding: 10px;
+	}
+}
+.cdk-drag-preview {
+	.piece {
+		width: 100%;
+		height: 100%;
+		opacity: 1;
+	}
+}
+.cdk-drag-placeholder {
+	display: none;
+}
+// .cdk-drop-list-dragging {
+// 	background-color: $success!important;
+// }
+.drag-location {
+	background-color: #4d4dff !important;
+}
+
+#container {
+	width: 800px;
+	height: 100vh;
+	margin-left: 10vw;
+	color: $text_1;
+	display: flex;
+	flex-flow: row wrap;
+	align-content: flex-start;
+	align-items: stretch;
+	overflow: auto;
+
+	&::-webkit-scrollbar {
+		width: 14px;
+		cursor: pointer;
+
+		&-track {
+			background-color: $background_3;
+			cursor: pointer;
+		}
+		&-corner {
+			background-color: $background_3;
+		}
+		&-thumb {
+			background-color: $background_5;
+			&:hover {
+				background-color: $primary0;
+			}
+			&:active {
+				background-color: $primary1;
+			}
+		}
+	}
+}
+
+#chess {
+	display: flex;
+	flex-direction: column;
+	margin-left: $spacing_1;
+	margin-top: $spacing_1;
+
+	h1 {
+		display: none;
+	}
+
+	.board {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-flow: row wrap;
+
+		.tile {
+			width: 12.5%;
+			height: 12.5%;
+			background-color: $tile_light;
+			align-items: center;
+			justify-content: center;
+
+			&__dark {
+				background-color: $tile_dark;
+				box-shadow: inset 2px 2px 3px 0px $tile_dark_shadow;
+				z-index: 10;
+			}
+
+			&__moveable {
+				background-color: $primary3;
+				cursor: pointer;
+			}
+			&__darkMovable {
+				background-color: $primary2;
+				box-shadow: inset 2px 2px 3px 0px $primary0;
+				cursor: pointer;
+			}
+		}
+
+		.piece_placeholder {
+			width: calc($default_board_size / 12.5);
+			height: calc($default_board_size / 12.5);
+
+			.piece {
+				width: 100%;
+				height: 100%;
+				cursor: pointer;
+				filter: opacity(100%);
+				transition: all 0.2s;
+
+				&.selected {
+					filter: opacity(50%);
+					transition: all 0.2s;
+				}
+			}
+		}
+	}
+}
+
+.coords{
+	
+
+	&__numbers {
+		width: 15px;
+		display: flex;
+		flex-direction: column-reverse;
+		margin-top: $spacing_1;
+		align-items: center;
+
+		div {
+			height: 12.5%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 12px;
+			color: $text_2;
+		}
+	}
+
+	&__letters {
+		height: 15px;
+		display: flex;
+		flex-direction: row;
+		margin-left: $spacing_1;
+		align-items: center;
+
+		div {
+			width: 12.5%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 12px;
+			color: $text_2;
+		}
+	}
+	
+}
+
+#sidebar {
+	background-color: $background_2;
+	width: 250px;
+	margin-top: $spacing_1;
+
+	h1 {
+		width: 100%;
+		background-color: $background_3;
+	}
+
+	ul {
+		width: 100%;
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+
+		& li {
+			width: 100%;
+			display: grid;
+			grid-template-columns: 30px calc(50% - 15px) calc(50% - 15px);
+			grid-auto-rows: 30px;
+
+			.current__move {
+				background-color: $primary1;
+			}
+
+			div {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+
+				&:first-of-type {
+					background-color: $background_2;
+
+					justify-content: center;
+				}
+				&:not(div:first-of-type) {
+					padding-left: 10px;
+					&:hover {
+						background-color: $primary0;
+						cursor: pointer;
+					}
+				}
+			}
+		}
+	}
+}
+
+#settings {
+	background-color: $background_2;
+	margin-left: $spacing_1;
+
+	.tab {
+		width: 100%;
+		background-color: $background_3;
+
+		&:hover {
+			background-color: $primary0;
+		}
+
+		&:active {
+			background-color: $primary1;
+		}
+
+		&__active {
+			background-color: $background_2;
+		}
+	}
+
+	.tab_display {
+		width: 100%;
+
+		.carosel {
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			overflow-y: hidden;
+
+			&::-webkit-scrollbar {
+				width: 10px;
+				&-track {
+					background-color: $background_3!important;
+				}
+				&-thumb {
+					background-color: $background_5!important;
+					&:hover {
+						background-color: $primary0!important;
+					}
+					&:active {
+						background-color: $primary1!important;
+					}
+				}
+			}
+
+			.theme {
+				display: block;
+				background-color: $background_4;
+				padding: 10px;
+				margin: 0;
+
+				&__selected {
+					background-color: $primary1;
+				}
+
+				&:hover {
+					background-color: $primary0;
+				}
+
+				&:active {
+					background-color: $primary1;
+				}
+
+				img {
+					width: 60px;
+					height: 60px;
+				}
+			}
+		}
+	}
+
+	.exportFen {
+		width: 100%;
+		border: none;
+
+		.fenInput {
+			width: 100%;
+		}
+	}
+}
+
+#controls {
+	background-color: $background_2;
+	width: 250px;
+	margin-left: $spacing_1;
+	.controls {
+		padding: $spacing_2;
+
+		button {
+			background-color: $background_4;
+		}
+	}
+}
+
+// @media only screen and (max-width: 800px) {
+//   #chess {
+//       width: 60vw;
+//       height: 60vw;
+//       padding: 0 20vw 0 20vw;
+//       flex-direction: column;
+//       justify-content: center;
+//     .board {
+//       width: 100%;
+//     }
+//     .sidebar {
+//       display: none;
+//     }
+
+//   }
+//   #options {
+//     width: 60vw;
+//     padding: 0 20vw 0 20vw;
+//     margin: 0;
+//   }
+// }
