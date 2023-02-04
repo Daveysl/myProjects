@@ -12,10 +12,11 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { FormsModule } from "@angular/forms";
 import {MatListModule} from '@angular/material/list';
 import { DragDropModule } from "@angular/cdk/drag-drop";
+import { ChessboardComponent } from './chessboard/chessboard.component';
 
 
 @NgModule({
-  declarations: [AppComponent, ChessComponent],
+  declarations: [AppComponent, ChessComponent, ChessboardComponent],
   imports: [
     BrowserModule,
     NoopAnimationsModule,
