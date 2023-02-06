@@ -1,115 +1,25 @@
 import { Component } from '@angular/core';
-import { ValidationData } from "./chess.model";
+import { ValidationData } from "./validation.model";
 import { Tile } from "../chess/board/tile.model"
 import { Piece } from "../chess/pieces/piece.model"
-import { Move, Turn, Castling } from "../chess/moves/moves.model"
-import { ChessOptions } from "../options/options.model"
+import { Move, Castling } from "../chess/moves/moves.model"
 
 import { CdkDrag } from "@angular/cdk/drag-drop";
+import { HistoryService } from '../chess/moves/history.service';
+import { MovesService } from '../chess/moves/moves.service';
+import { OptionsService } from '../chess/options/options.service';
+import { ChessOptions } from '../chess/options/options.model';
+import { PieceLogicService } from '../chess/pieces/piece-logic.service';
+import { BoardService } from '../chess/board/board.service';
 
 @Component({
-  selector: 'app-chessboard',
-  templateUrl: './chessboard.component.html',
-  styleUrls: ['./chessboard.component.scss']
+	selector: 'app-chessboard',
+	templateUrl: './chessboard.component.html',
+	styleUrls: ['./chessboard.component.scss']
 })
 export class ChessboardComponent {
-// List of each chess piece
-	// first space (0) used for blank or null space
-	public pieces: Piece[] = [
-		{
-			key: null, // ID of tile
-			name: "", // name of piece
-			abbr: "", // abbreviation of name
-			value: 0, // numeric ID of piece
-			player: "", // name of player
-		},
-		{
-			key: null,
-			name: "pawn",
-			abbr: "P",
-			value: 1,
-			player: "w",
-		},
-		{
-			key: null,
-			name: "bishop",
-			abbr: "B",
-			value: 2,
-			player: "w",
-		},
-		{
-			key: null,
-			name: "knight",
-			abbr: "N",
-			value: 3,
-			player: "w",
-		},
-		{
-			key: null,
-			name: "rook",
-			abbr: "R",
-			value: 4,
-			player: "w",
-		},
-		{
-			key: null,
-			name: "king",
-			abbr: "K",
-			value: 5,
-			player: "w",
-		},
-		{
-			key: null,
-			name: "queen",
-			abbr: "Q",
-			value: 6,
-			player: "w",
-		},
-		{
-			key: null,
-			name: "pawn",
-			abbr: "p",
-			value: 7,
-			player: "b",
-		},
-		{
-			key: null,
-			name: "bishop",
-			abbr: "b",
-			value: 8,
-			player: "b",
-		},
-		{
-			key: null,
-			name: "knight",
-			abbr: "n",
-			value: 9,
-			player: "b",
-		},
-		{
-			key: null,
-			name: "rook",
-			abbr: "r",
-			value: 10,
-			player: "b",
-		},
-		{
-			key: null,
-			name: "queen",
-			abbr: "q",
-			value: 11,
-			player: "b",
-		},
-		{
-			key: null,
-			name: "king",
-			abbr: "k",
-			value: 12,
-			player: "b",
-		},
-	];
-  public OPTIONS_LIST: string[] = ["Piece Set", "FEN"];
-  public DEFAULT_FEN: string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+	public DEFAULT_FEN: string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 	public DEFAULT_PIECESET: string = "cburnett";
 	public DEFAULT_DISPLAY: string = "Piece Set";
 	public DEFAULT_THEMES: string[] = [
@@ -144,205 +54,59 @@ export class ChessboardComponent {
 		"staunty",
 		"tatiana",
 	];
-	//  object for options
-	public options: ChessOptions;
 
-  // list of coordinate letters
-  public LETTERS: string[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
-	// adjustable board length
-	public boardSize: number;
+	// //  object for options
+	// public options: ChessOptions;
+
+	// list of coordinate letters
+	public LETTERS: string[];
 	// recorded mouse location (currently unused)
 	public mouseLoc: number[];
-	
+
+	public options: ChessOptions;
+
 	// board initiated
-	public board: Tile[] = [];
-	
-	// tile that was selected last
-	private storedTile: Tile;
-	// the current turn
+	public board: Tile[];
 	public currentPlayer: string;
-	
-	// object to check if castle move is legal
 	private castling: Castling;
+	public step: string;
 
-	// check if selecting a piece or moving to a location
-	private step: string;
-	
-	// list of past moves 
-	private moveHistory: Turn[];
-
-	constructor() {
-		this.initBoard();
-		this.setDefaults();
-	}
-
-	// Setup Methods
-	private setDefaults(): void {
-		// Variables
-		this.storedTile = this.createNullTile(null);
-		this.currentPlayer = "w";
-		this.step = "piece";
-		this.boardSize = 500;
-
-		// Arrays
-		this.moveHistory = [];
-
-		// Objects
-		this.castling = {
-			wlong: true,
-			wshort: true,
-			blong: true,
-			bshort: true,
-		};
-		this.options = {
-			pieceSet: this.DEFAULT_PIECESET,
-			pieceSetList: this.DEFAULT_THEMES,
-			fenValue: this.DEFAULT_FEN,
-			display: this.DEFAULT_DISPLAY,
-		};
-		this.importFenValue(this.DEFAULT_FEN);
-	}
-
-	// Initialize Methods ---------------------------------------------------------------------------------------
-	// initialize the board 
-	private initBoard(): void {
-		// created a board based on a past board generation loop
-		this.board = [
-		{key:0,piece:{key:0,name:"rook",abbr:"r",value:10,player:"b",},color:false,x:0,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:1,piece:{key:1,name:"knight",abbr:"n",value:9,player:"b",},color:true,x:1,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:2,piece:{key:2,name:"bishop",abbr:"b",value:8,player:"b",},color:false,x:2,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:3,piece:{key:3,name:"queen",abbr:"q",value:11,player:"b",},color:true,x:3,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:4,piece:{key:4,name:"king",abbr:"k",value:12,player:"b",},color:false,x:4,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:5,piece:{key:5,name:"bishop",abbr:"b",value:8,player:"b",},color:true,x:5,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:6,piece:{key:6,name:"knight",abbr:"n",value:9,player:"b",},color:false,x:6,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:7,piece:{key:7,name:"rook",abbr:"r",value:10,player:"b",},color:true,x:7,y:7,selected:false,enpassantable:false,moveable:false},
-		{key:8,piece:{key:8,name:"pawn",abbr:"p",value:7,player:"b",},color:true,x:0,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:9,piece:{key:9,name:"pawn",abbr:"p",value:7,player:"b",},color:false,x:1,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:10,piece:{key:10,name:"pawn",abbr:"p",value:7,player:"b",},color:true,x:2,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:11,piece:{key:11,name:"pawn",abbr:"p",value:7,player:"b",},color:false,x:3,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:12,piece:{key:12,name:"pawn",abbr:"p",value:7,player:"b",},color:true,x:4,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:13,piece:{key:13,name:"pawn",abbr:"p",value:7,player:"b",},color:false,x:5,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:14,piece:{key:14,name:"pawn",abbr:"p",value:7,player:"b",},color:true,x:6,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:15,piece:{key:15,name:"pawn",abbr:"p",value:7,player:"b",},color:false,x:7,y:6,selected:false,enpassantable:false,moveable:false},
-		{key:16,piece:{key:16,name:"",abbr:"",value:0,player:"",},color:false,x:0,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:17,piece:{key:17,name:"",abbr:"",value:0,player:"",},color:true,x:1,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:18,piece:{key:18,name:"",abbr:"",value:0,player:"",},color:false,x:2,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:19,piece:{key:19,name:"",abbr:"",value:0,player:"",},color:true,x:3,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:20,piece:{key:20,name:"",abbr:"",value:0,player:"",},color:false,x:4,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:21,piece:{key:21,name:"",abbr:"",value:0,player:"",},color:true,x:5,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:22,piece:{key:22,name:"",abbr:"",value:0,player:"",},color:false,x:6,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:23,piece:{key:23,name:"",abbr:"",value:0,player:"",},color:true,x:7,y:5,selected:false,enpassantable:false,moveable:false},
-		{key:24,piece:{key:24,name:"",abbr:"",value:0,player:"",},color:true,x:0,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:25,piece:{key:25,name:"",abbr:"",value:0,player:"",},color:false,x:1,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:26,piece:{key:26,name:"",abbr:"",value:0,player:"",},color:true,x:2,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:27,piece:{key:27,name:"",abbr:"",value:0,player:"",},color:false,x:3,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:28,piece:{key:28,name:"",abbr:"",value:0,player:"",},color:true,x:4,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:29,piece:{key:29,name:"",abbr:"",value:0,player:"",},color:false,x:5,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:30,piece:{key:30,name:"",abbr:"",value:0,player:"",},color:true,x:6,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:31,piece:{key:31,name:"",abbr:"",value:0,player:"",},color:false,x:7,y:4,selected:false,enpassantable:false,moveable:false},
-		{key:32,piece:{key:32,name:"",abbr:"",value:0,player:"",},color:false,x:0,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:33,piece:{key:33,name:"",abbr:"",value:0,player:"",},color:true,x:1,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:34,piece:{key:34,name:"",abbr:"",value:0,player:"",},color:false,x:2,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:35,piece:{key:35,name:"",abbr:"",value:0,player:"",},color:true,x:3,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:36,piece:{key:36,name:"",abbr:"",value:0,player:"",},color:false,x:4,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:37,piece:{key:37,name:"",abbr:"",value:0,player:"",},color:true,x:5,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:38,piece:{key:38,name:"",abbr:"",value:0,player:"",},color:false,x:6,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:39,piece:{key:39,name:"",abbr:"",value:0,player:"",},color:true,x:7,y:3,selected:false,enpassantable:false,moveable:false},
-		{key:40,piece:{key:40,name:"",abbr:"",value:0,player:"",},color:true,x:0,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:41,piece:{key:41,name:"",abbr:"",value:0,player:"",},color:false,x:1,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:42,piece:{key:42,name:"",abbr:"",value:0,player:"",},color:true,x:2,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:43,piece:{key:43,name:"",abbr:"",value:0,player:"",},color:false,x:3,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:44,piece:{key:44,name:"",abbr:"",value:0,player:"",},color:true,x:4,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:45,piece:{key:45,name:"",abbr:"",value:0,player:"",},color:false,x:5,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:46,piece:{key:46,name:"",abbr:"",value:0,player:"",},color:true,x:6,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:47,piece:{key:47,name:"",abbr:"",value:0,player:"",},color:false,x:7,y:2,selected:false,enpassantable:false,moveable:false},
-		{key:48,piece:{key:48,name:"pawn",abbr:"P",value:1,player:"w",},color:false,x:0,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:49,piece:{key:49,name:"pawn",abbr:"P",value:1,player:"w",},color:true,x:1,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:50,piece:{key:50,name:"pawn",abbr:"P",value:1,player:"w",},color:false,x:2,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:51,piece:{key:51,name:"pawn",abbr:"P",value:1,player:"w",},color:true,x:3,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:52,piece:{key:52,name:"pawn",abbr:"P",value:1,player:"w",},color:false,x:4,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:53,piece:{key:53,name:"pawn",abbr:"P",value:1,player:"w",},color:true,x:5,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:54,piece:{key:54,name:"pawn",abbr:"P",value:1,player:"w",},color:false,x:6,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:55,piece:{key:55,name:"pawn",abbr:"P",value:1,player:"w",},color:true,x:7,y:1,selected:false,enpassantable:false,moveable:false},
-		{key:56,piece:{key:56,name:"rook",abbr:"R",value:4,player:"w",},color:true,x:0,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:57,piece:{key:57,name:"knight",abbr:"N",value:3,player:"w",},color:false,x:1,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:58,piece:{key:58,name:"bishop",abbr:"B",value:2,player:"w",},color:true,x:2,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:59,piece:{key:59,name:"queen",abbr:"Q",value:6,player:"w",},color:false,x:3,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:60,piece:{key:60,name:"king",abbr:"K",value:5,player:"w",},color:true,x:4,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:61,piece:{key:61,name:"bishop",abbr:"B",value:2,player:"w",},color:false,x:5,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:62,piece:{key:62,name:"knight",abbr:"N",value:3,player:"w",},color:true,x:6,y:0,selected:false,enpassantable:false,moveable:false},
-		{key:63,piece:{key:63,name:"rook",abbr:"R",value:4,player:"w",},color:false,x:7,y:0,selected:false,enpassantable:false,moveable:false}
-	];
-	}
-  
-	// create a new Move object
-	private initMove(): Move {
-		return {
-			turnNum: 0,
-			piece: this.createNullPiece(null),
-			capturing: false,
-			past: [],
-			new: [],
-			notation: "",
-			fenState: "",
-			current: false,
-		};
-	}
-	// create a new Turn object
-	private createNewTurn(): Turn {
-		return {
-			num: this.moveHistory.length + 1,
-			white: this.initMove(),
-			black: this.initMove(),
-		};
-	}
-	// create an empty or default piece
-	private createNullPiece(key: number) {
-		return {
-			key: key, // ID of tile
-			name: "", // name of piece
-			abbr: "", // abbreviation of name
-			value: 0, // numeric ID of piece
-			player: "", // name of player
-			
-		};
-	}
-	// create an empty or default tile
-	private createNullTile(key: number) {
-		return {
-			key: key,
-			piece: this.createNullPiece(null),
-			color: false,
-			x: 0,
-			y: 0,
-			selected: false,
-			enpassantable: false,
-			moveable: false,
-		}
+	constructor(
+		private historyService: HistoryService,
+		private moveService: MovesService,
+		private optionsService: OptionsService,
+		private pieceService: PieceLogicService,
+		private boardService: BoardService
+	) {
+		this.options = optionsService.options;
+		this.currentPlayer = moveService.currentPlayer;
+		this.optionsService.setDefaults();
+		this.board = this.boardService.board;
+		this.LETTERS = this.moveService.letters;
+		this.step = moveService.step;
 	}
 
 	// Main Methods
 	private selectTile(tile: Tile): void {
 		if (this.currentPlayer === tile.piece.player) {
-			this.storedTile.piece = tile.piece;
+			this.moveService.storedTile.piece = tile.piece;
 			tile.selected = true;
 			this.step = "location";
 			this.displayMoveableTiles();
 		}
 	}
-
 	private selectLocation(location: Tile): void {
-		if (location.key !== this.storedTile.piece.key && location.piece.player !== this.storedTile.piece.player) {
+		if (location.key !== this.moveService.storedTile.piece.key && location.piece.player !== this.moveService.storedTile.piece.player) {
 			if (this.validateMove(location, false)) {
 				console.log("move is valid");
 				this.movePiece(location, 1);
 			} else {
 				console.log("This is not a valid move");
-				this.storedTile.piece = this.createNullPiece(null);
+				this.moveService.storedTile.piece = this.pieceService.createNullPiece(null);
 				this.step = "piece";
 			}
-		} else if (location.piece.player === this.storedTile.piece.player) {
-			if (location.piece.key === this.storedTile.piece.key) {
+		} else if (location.piece.player === this.moveService.storedTile.piece.player) {
+			if (location.piece.key === this.moveService.storedTile.piece.key) {
 				location.selected = false;
 				this.step = "piece";
 			} else {
@@ -350,37 +114,37 @@ export class ChessboardComponent {
 			}
 		} else {
 			console.log("this is not a valid location");
-			this.storedTile.piece = this.createNullPiece(null);
+			this.moveService.storedTile.piece = this.pieceService.createNullPiece(null);
 			this.step = "piece";
-			if (location.key === this.storedTile.piece.key) {
+			if (location.key === this.moveService.storedTile.piece.key) {
 				this.selectTile(location);
 			}
 		}
 	}
 	private movePiece(location: Tile, code: number): void {
-		let piece = this.storedTile.piece;
+		let piece = this.moveService.storedTile.piece;
 		let capturing = location.piece.value !== 0 ? true : false;
 		if (code === 3) {
 			capturing = true;
 		}
-		let move = this.createMove(this.board[piece.key], location, capturing);
+		let move = this.moveService.createMove(this.board[piece.key], location, capturing);
 
 		// change location's piece to selected piece
 		this.board[location.key].piece = piece;
 		// change selected piece's tile to empty
-		this.board[piece.key].piece = this.createNullPiece(
+		this.board[piece.key].piece = this.pieceService.createNullPiece(
 			this.board[piece.key].key
 		);
 		// settle the piece into its new location
 		location.piece.key = location.key;
 
 		// record move
-		this.updateFenValue();
-		this.moveHistory.forEach((turn) => {
+		this.boardService.updateFenValue();
+		this.historyService.moveHistory.forEach((turn) => {
 			turn.white.current = false;
 			turn.black.current = false;
 		});
-		move.fenState = this.options.fenValue;
+		move.fenState = this.boardService.fenValue;
 		move.notation = this.createNotation(move);
 		move.current = true;
 		this.setTurn(move);
@@ -391,15 +155,18 @@ export class ChessboardComponent {
 			tile.moveable = false;
 		});
 		// erase the piece from storage
-		this.storedTile.piece = this.createNullPiece(null);
+		this.moveService.storedTile.piece = this.pieceService.createNullPiece(null);
 		if (code !== 2) {
 			this.currentPlayer = this.currentPlayer == "w" ? "b" : "w";
 		}
 
 		this.step = "piece";
 	}
+
+	// ------------------------------------
+
 	private defineValidationData(pastLocation: Tile, newLocation: Tile): ValidationData {
-		let white: boolean = this.storedTile.piece.player === "w" ? true : false;
+		let white: boolean = this.moveService.storedTile.piece.player === "w" ? true : false;
 		let startrow: number = white ? 1 : 6;
 		let playerValue = white ? 1 : -1;
 
@@ -422,26 +189,26 @@ export class ChessboardComponent {
 
 		// PIECES -------------------------------------
 		// picking a location to move
-		switch (this.storedTile.piece.name) {
+		switch (this.moveService.storedTile.piece.name) {
 			case "pawn":
 				{
 					let pawnMoveTile: Tile;
 					// 1 - single move
-					pawnMoveTile = this.findTile(x, y+1*playerValue);
-					if (pawnMoveTile.piece.value === 0 && pawnMoveTile.piece.player !== this.storedTile.piece.player) {
+					pawnMoveTile = this.findTile(x, y + 1 * playerValue);
+					if (pawnMoveTile.piece.value === 0 && pawnMoveTile.piece.player !== this.moveService.storedTile.piece.player) {
 						data.moves.push([x, y + 1 * playerValue, 0]);
 
 						// 2 - double move
 						// must be previously unmoved (on its starting row)
-						pawnMoveTile = this.findTile(x,y + 2 * playerValue);
-						if (pawnMoveTile.piece.value === 0 && pawnMoveTile.piece.player !== this.storedTile.piece.player&& y === startrow) {
-							data.moves.push([x,y + 2 * playerValue,1,]);
+						pawnMoveTile = this.findTile(x, y + 2 * playerValue);
+						if (pawnMoveTile.piece.value === 0 && pawnMoveTile.piece.player !== this.moveService.storedTile.piece.player && y === startrow) {
+							data.moves.push([x, y + 2 * playerValue, 1,]);
 						}
 					}
 
 					// 3 - capturing Piece
-					if (newLocation.piece.value !== 0 && newLocation.piece.player !== this.storedTile.piece.player) {
-						data.moves.push([x + 1, y + 1 * playerValue, 0],[x - 1, y + 1 * playerValue, 0]);
+					if (newLocation.piece.value !== 0 && newLocation.piece.player !== this.moveService.storedTile.piece.player) {
+						data.moves.push([x + 1, y + 1 * playerValue, 0], [x - 1, y + 1 * playerValue, 0]);
 					}
 
 					// 4 - en passanting Piece
@@ -519,12 +286,12 @@ export class ChessboardComponent {
 
 					if (!pieceInTheWay && correctDirection) {
 						if (
-							newLocation.piece.player !== this.storedTile.piece.player
+							newLocation.piece.player !== this.moveService.storedTile.piece.player
 						) {
 							data.moves.push([x2, y2, 0]);
 
 							// castling functionality
-							if (this.storedTile.piece.player === "w") {
+							if (this.moveService.storedTile.piece.player === "w") {
 								if (y === 0) {
 									if (x === 0 && this.castling.wlong) {
 										// console.log(
@@ -576,18 +343,18 @@ export class ChessboardComponent {
 						[x, y - 1, 0]
 					);
 
-					// add castling moves
+					// add castling moveService
 					let pY = 0; // player Y coord
 					let cD = ""; // castling Direction
 
-					if (this.storedTile.piece.player === "w") {
+					if (this.moveService.storedTile.piece.player === "w") {
 						pY = 0;
 						if (x2 === 6 && this.castling.wshort) {
 							cD = "short";
 						} else if (x2 === 2 && this.castling.wlong) {
 							cD = "long";
 						}
-					} else if (this.storedTile.piece.player === "b") {
+					} else if (this.moveService.storedTile.piece.player === "b") {
 						pY = 7;
 						if (x2 === 6 && this.castling.bshort) {
 							cD = "short";
@@ -604,14 +371,14 @@ export class ChessboardComponent {
 						this.castleAction(pY, 0, 3);
 					}
 
-					// break castle function if king moves
+					// break castle function if king moveService
 					if (x === 4) {
-						if (this.storedTile.piece.player === "w" && y === 0) {
+						if (this.moveService.storedTile.piece.player === "w" && y === 0) {
 							console.log("white can no longer castle.");
 							this.castling.wlong = false;
 							this.castling.wshort = false;
 						} else if (
-							this.storedTile.piece.player === "b" &&
+							this.moveService.storedTile.piece.player === "b" &&
 							y === 7
 						) {
 							console.log("black can no longer castle.");
@@ -645,7 +412,7 @@ export class ChessboardComponent {
 
 					if (!pieceInTheWay && correctDirection) {
 						if (
-							newLocation.piece.player !== this.storedTile.piece.player
+							newLocation.piece.player !== this.moveService.storedTile.piece.player
 						) {
 							data.moves.push([x2, y2, 0]);
 						}
@@ -659,7 +426,7 @@ export class ChessboardComponent {
 					let b =
 						y2 >= y ? y2 - y : y - y2;
 
-					// literally just data.moves like bishop and rook
+					// literally just data.moveService like bishop and rook
 					if (y === y2) {
 						// horizontal
 						correctDirection = true;
@@ -698,7 +465,7 @@ export class ChessboardComponent {
 
 					if (!pieceInTheWay && correctDirection) {
 						if (
-							newLocation.piece.player !== this.storedTile.piece.player
+							newLocation.piece.player !== this.moveService.storedTile.piece.player
 						) {
 							data.moves.push([x2, y2, 0]);
 						}
@@ -712,7 +479,7 @@ export class ChessboardComponent {
 		let valid: boolean = false;
 
 		let data: ValidationData = this.defineValidationData(
-			this.board[this.storedTile.piece.key],
+			this.board[this.moveService.storedTile.piece.key],
 			newLocation
 		);
 
@@ -728,11 +495,11 @@ export class ChessboardComponent {
 						// if move was a double pawn move, and it's not just doing a move display
 						if (move[2] === 1) {
 							// aha! a sneaky double move... if only if there was a way to do something about this!!!!!!!
-							let doubleMovedPawn = this.findTile(data.x2, data.y2 - 1*data.pV);
+							let doubleMovedPawn = this.findTile(data.x2, data.y2 - 1 * data.pV);
 							doubleMovedPawn.enpassantable = true;
 						} else if (move[2] === 2) {
-							let victim = this.findTile(data.x2, data.y2 - 1*data.pV);
-							this.board[victim.key].piece = this.createNullPiece(this.board[victim.piece.key].key);
+							let victim = this.findTile(data.x2, data.y2 - 1 * data.pV);
+							this.board[victim.key].piece = this.pieceService.createNullPiece(this.board[victim.piece.key].key);
 						}
 					}
 				}
@@ -742,14 +509,15 @@ export class ChessboardComponent {
 		return valid;
 	}
 
+	// ------------------------------------
+
 	private castleAction(pY: number, rX: number, rX2: number): void {
 		console.log("rX,rX2:" + rX, rX2);
-		let saveTheStoredPiece = this.storedTile.piece;
-		this.storedTile.piece = this.findTile(rX, pY).piece;
+		let saveTheStoredPiece = this.moveService.storedTile.piece;
+		this.moveService.storedTile.piece = this.findTile(rX, pY).piece;
 		this.movePiece(this.findTile(rX2, pY), 2);
-		this.storedTile.piece = saveTheStoredPiece;
+		this.moveService.storedTile.piece = saveTheStoredPiece;
 	}
-
 	private displayMoveableTiles(): void {
 		this.board.forEach((tile) => {
 			if (this.validateMove(tile, true)) {
@@ -757,41 +525,19 @@ export class ChessboardComponent {
 			}
 		});
 	}
-
 	// Search Methods
-	private findAbbr(value: number): string {
-		return this.pieces[value].abbr;
-	}
 	private findTile(x: number, y: number): Tile {
 		return this.board.find((tile) => tile.x === x && tile.y === y);
 	}
-	private getLetter(value: number): string {
-		return this.LETTERS[value];
-	}
-	private findPieceFromChar(char: string): Piece {
-		let piece = this.pieces.find((piece) => piece.abbr == char);
-		// return this.pieces.find(piece => {piece.abbr == char})
-		return piece;
-		// return piece;
-	}
 
 	// Recording
-	private createMove(oldTile: Tile, newTile: Tile, capturing: boolean): Move {
-		let move = this.initMove();
-		move.piece = oldTile.piece;
-		move.capturing = capturing;
-		move.past = [oldTile.x, oldTile.y];
-		move.new = [newTile.x, newTile.y];
-		move.fenState = "";
-		return move;
-	}
 	private createNotation(move: Move): string {
 		let note: string = "";
 		let pieceAbbr: string = move.piece.abbr.toUpperCase();
 
 		let pastCoord: string =
-			this.getLetter(move.past[0]) + (move.past[1] + 1);
-		let newCoord: string = this.getLetter(move.new[0]) + (move.new[1] + 1);
+			this.moveService.getLetter(move.past[0]) + (move.past[1] + 1);
+		let newCoord: string = this.moveService.getLetter(move.new[0]) + (move.new[1] + 1);
 
 		if (move.capturing) {
 			pieceAbbr = pieceAbbr === "P" ? pastCoord : pieceAbbr;
@@ -805,13 +551,13 @@ export class ChessboardComponent {
 		// console.log("move: ", move.current)
 		let turn =
 			this.currentPlayer === "w"
-				? this.createNewTurn()
-				: this.moveHistory[this.moveHistory.length - 1];
+				? this.historyService.createNewTurn()
+				: this.historyService.moveHistory[this.historyService.moveHistory.length - 1];
 
 		if (this.currentPlayer === "w") {
 			turn.white = move;
 			turn.white.turnNum = turn.num;
-			this.moveHistory.push(turn);
+			this.historyService.moveHistory.push(turn);
 			// console.log(this.turnHistory);
 		} else {
 			turn.black = move;
@@ -819,88 +565,12 @@ export class ChessboardComponent {
 			// console.log(this.turnHistory);
 		}
 	}
-	private updateFenValue(): void {
-		let string: string = "";
-		let rowID: number = 0;
-		let spaces = 0;
-
-		this.board.forEach((tile) => {
-			let data = tile.piece.value;
-			if (data !== 0) {
-				string = spaces != 0 ? (string += spaces) : string;
-				spaces = 0;
-				string += this.findAbbr(data);
-			} else {
-				spaces++;
-			}
-			if (rowID === 7) {
-				rowID = 0;
-				string = spaces != 0 ? (string += spaces) : string;
-				string += "/";
-				spaces = 0;
-			} else {
-				rowID++;
-			}
-		});
-		this.options.fenValue = string.slice(0, -1) + " w KQkq - 0 1";
-	}
-	private importFenValue(fen: string): void {
-		let fenArray: string[] = [];
-
-		fen.split("/").forEach((row, i) => {
-			if (i === 7) {
-				let info = row.split(" ");
-				// console.log(info);
-				// ['RNBQKBNR', 'w', 'KQkq', '-', '0', '1']
-				row = info[0];
-				this.currentPlayer = info[1];
-			}
-
-			row.split("").forEach((char) => {
-				if (+char) {
-					for (let i = 0; i < Number(char); i++) {
-						fenArray.push("");
-					}
-				} else {
-					fenArray.push(char);
-				}
-			});
-		});
-		for (let i = 0; i < 64; i++) {
-			let newPiece = this.findPieceFromChar(fenArray[i]);
-			this.board[i].piece.abbr = newPiece.abbr;
-			this.board[i].piece.name = newPiece.name;
-			this.board[i].piece.player = newPiece.player;
-			this.board[i].piece.value = newPiece.value;
-		}
-	}
-	private validateFenValue(fen: string): boolean {
-		let flag = false;
-		/** Test Cases:
-		 * 1. Fen must have length of 8 sections seperated by '/', then a 9th one containing Fen metadata.
-		 * 2. Each section can only contain letters 'pnbrqk or PNBRQK or empty'
-		 * 3. Each section must be 8 characters long
-		 */
-
-		if (fen.split("/").length !== 8) {
-			flag = true;
-		}
-		return !flag;
-	}
 
 	// Event Listeners
-	public onFenValueChange(value: string): void {
-		if (this.validateFenValue(value)) {
-			// console.log(value);
-
-			this.importFenValue(value);
-			this.options.fenValue = value;
-		}
-	}
 	public pieceClicked(event: MouseEvent, key: number): void {
 		this.mouseLoc = [event.clientX, event.clientY]
 		// console.log(this.mouseLoc);
-		
+
 		// INIT
 		let tile = this.board.find((tile) => tile.key === key);
 		this.board.forEach((tile) => {
@@ -908,8 +578,8 @@ export class ChessboardComponent {
 			tile.moveable = false;
 		});
 
-		console.log("tile:", this.getLetter(tile.x) + (tile.y + 1));
-		
+		console.log("tile:", this.moveService.getLetter(tile.x) + (tile.y + 1));
+
 		switch (this.step) {
 			case "piece":
 				if (tile.piece.player === this.currentPlayer) {
@@ -920,19 +590,19 @@ export class ChessboardComponent {
 				if (tile.piece.player !== this.currentPlayer) {
 					this.selectLocation(tile);
 				} else {
-					console.log(tile.piece.key, this.storedTile.piece.key)
-					
-					if (tile.piece.key !== this.storedTile.piece.key){
+					console.log(tile.piece.key, this.moveService.storedTile.piece.key)
+
+					if (tile.piece.key !== this.moveService.storedTile.piece.key) {
 						this.selectTile(tile);
 
 					} else {
 						this.step = "piece";
 					}
-					
+
 				}
-				// else if (tile.piece.player === this.currentPlayer && tile.key !== this.storedTile.key) {
+				// else if (tile.piece.player === this.currentPlayer && tile.key !== this.moveService.storedTile.key) {
 				// 	console.log("keys man")
-					
+
 				// } else {
 				// 	this.selectTile(tile);
 				// }
@@ -942,43 +612,15 @@ export class ChessboardComponent {
 				break;
 		}
 	}
-	public changeSet(theme: string): void {
-		this.options.pieceSet = theme;
-		console.log("theme is", theme);
-	}
-	public openTab(tab: string) {
-		this.options.display = tab;
-	}
-	public getPast(move: Move) {
-		this.moveHistory.forEach((turn) => {
-			turn.white.current = false;
-			turn.black.current = false;
-		});
-		console.log(move.fenState);
-		this.options.fenValue = move.fenState;
-		this.importFenValue(move.fenState);
-
-		if (move.piece.player === "w") {
-			this.moveHistory[move.turnNum - 1].white.current = true;
-			this.currentPlayer = "b";
-			this.moveHistory.splice(move.turnNum);
-			this.moveHistory[move.turnNum - 1].black = this.initMove();
-		} else {
-			this.moveHistory[move.turnNum - 1].black.current = true;
-			this.currentPlayer = "w";
-			this.moveHistory.splice(move.turnNum);
-		}
-	}
-
 	public piecePickedUp(event: CdkDrag<Tile>, tile: Tile) {
-  		console.log(tile);
-		// if (this.storedTile.piece.player === this.currentPlayer) {
-			console.log("piece picked up:", tile.piece.name, event);
-			this.selectTile(tile);
+		console.log(tile);
+		// if (this.moveService.storedTile.piece.player === this.currentPlayer) {
+		console.log("piece picked up:", tile.piece.name, event);
+		this.selectTile(tile);
 		// }
 	}
 	public pieceDropped(tile: Tile) {
-		if (this.storedTile.piece.player !== "" && this.storedTile.piece.player !== tile.piece.player) {
+		if (this.moveService.storedTile.piece.player !== "" && this.moveService.storedTile.piece.player !== tile.piece.player) {
 			this.selectLocation(tile);
 		} else {
 			console.log("oops");

@@ -1,16 +1,17 @@
 <section id="sidebar">
-    <h1>Moves</h1>
-    <div class="history">
-      <ul>
-        <li *ngFor="let turn of moveHistory" role="listitem">
-          <div>{{ turn.num + "." }}</div>
-          <div [ngClass]="{current__move: turn.white.current}" (click)="getPast(turn.white)">
-            {{ turn.white.notation }}
-          </div>
-          <div [ngClass]="{current__move: turn.black.current}" (click)="getPast(turn.black)" *ngIf="turn.black.notation !== '' ">
-            {{ turn.black.notation }}
-          </div>
-        </li>
-      </ul>
-    </div>
-  </section>
+  <h1>Moves</h1>
+  <div class="history">
+    <ul>
+      <li *ngFor="let turn of moveHistory" role="listitem">
+        <div>{{ turn.num + "." }}</div>
+        <div [ngClass]="{current__move: turn.white.current}" (click)="getPast(turn.white)">
+          {{ turn.white.notation }}
+        </div>
+        <div [ngClass]="{current__move: turn.black.current}" (click)="getPast(turn.black)"
+          *ngIf="turn.black.notation !== '' ">
+          {{ turn.black.notation }}
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
