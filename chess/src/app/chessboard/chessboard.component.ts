@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ValidationData } from "./validation.model";
 import { Tile } from "../chess/board/tile.model"
 import { Piece } from "../chess/pieces/piece.model"
-import { Move, Castling } from "../chess/moves/moves.model"
+import { Move, Castling, Turn } from "../chess/moves/moves.model"
 
 import { CdkDrag } from "@angular/cdk/drag-drop";
 import { HistoryService } from '../chess/moves/history.service';
@@ -23,14 +23,14 @@ export class ChessboardComponent {
 	public LETTERS: string[];
 	// recorded mouse location (currently unused)
 	public mouseLoc: number[];
-
 	public options: ChessOptions;
 
 	// board initiated
 	public board: Tile[];
-	public currentPlayer: string;
-	private castling: Castling;
+	public castling: Castling;
 	public step: string;
+
+	public currentPlayer: string;
 
 	constructor(
 		private historyService: HistoryService,
@@ -49,7 +49,7 @@ export class ChessboardComponent {
 
 	// Main Methods
 	private selectTile(tile: Tile): void {
-		if (this.currentPlayer === tile.piece.player) {
+		if (this.moveService.currentPlayer === tile.piece.player) {
 			this.moveService.storedTile.piece = tile.piece;
 			tile.selected = true;
 			this.step = "location";
@@ -108,7 +108,7 @@ export class ChessboardComponent {
 			turn.black.current = false;
 		});
 		move.fenState = this.boardService.fenValue;
-		move.notation = this.createNotation(move);
+		move.notation = this.moveService.createNotation(move);
 		move.current = true;
 		this.moveService.setTurn(move);
 
@@ -120,9 +120,9 @@ export class ChessboardComponent {
 		// erase the piece from storage
 		this.moveService.storedTile.piece = this.pieceService.createNullPiece(null);
 		if (code !== 2) {
-			console.log("currentPlayer:", this.currentPlayer)
-			this.currentPlayer = this.currentPlayer == "w" ? "b" : "w";
+			this.moveService.currentPlayer = this.moveService.currentPlayer == "w" ? "b" : "w";
 		}
+		console.log("currentPlayer:", this.moveService.currentPlayer);
 
 		this.step = "piece";
 	}
@@ -448,7 +448,7 @@ export class ChessboardComponent {
 		);
 
 		data.moves.forEach((move) => {
-			if (this.board[newLocation.piece.key].piece.player !== this.currentPlayer) {
+			if (this.board[newLocation.piece.key].piece.player !== this.moveService.currentPlayer) {
 				if (move[0] === data.x2 && move[1] === data.y2) {
 					valid = true;
 					if (!checkingAvailableMoves) {
@@ -493,26 +493,7 @@ export class ChessboardComponent {
 	private findTile(x: number, y: number): Tile {
 		return this.board.find((tile) => tile.x === x && tile.y === y);
 	}
-
-	// Recording
-	private createNotation(move: Move): string {
-		let note: string = "";
-		let pieceAbbr: string = move.piece.abbr.toUpperCase();
-
-		let pastCoord: string =
-			this.moveService.getLetter(move.past[0]) + (move.past[1] + 1);
-		let newCoord: string = this.moveService.getLetter(move.new[0]) + (move.new[1] + 1);
-
-		if (move.capturing) {
-			pieceAbbr = pieceAbbr === "P" ? pastCoord : pieceAbbr;
-			note = pieceAbbr[0] + "x" + newCoord;
-		} else {
-			note = pieceAbbr === "P" ? newCoord : pieceAbbr + newCoord;
-		}
-		return note;
-	}
 	
-
 	// Event Listeners
 	public pieceClicked(event: MouseEvent, key: number): void {
 		this.mouseLoc = [event.clientX, event.clientY]
@@ -529,12 +510,12 @@ export class ChessboardComponent {
 
 		switch (this.step) {
 			case "piece":
-				if (tile.piece.player === this.currentPlayer) {
+				if (tile.piece.player === this.moveService.currentPlayer) {
 					this.selectTile(tile);
 				}
 				break;
 			case "location":
-				if (tile.piece.player !== this.currentPlayer) {
+				if (tile.piece.player !== this.moveService.currentPlayer) {
 					this.selectLocation(tile);
 				} else {
 					console.log(tile.piece.key, this.moveService.storedTile.piece.key)

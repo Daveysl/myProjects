@@ -15,7 +15,6 @@ export class MovesService {
 	private _letters: string[];
 
 	constructor(
-		private pieceLogicService: PieceLogicService,
 		private historyService: HistoryService
 	) {
 		this._letters = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -49,6 +48,9 @@ export class MovesService {
 	}
 
 	//  ----- Public Methods
+
+
+	
 	// get a letter from letters list
 	public getLetter(value: number): string {
 		return this.letters[value];
@@ -73,7 +75,8 @@ export class MovesService {
 				? this.historyService.createNewTurn()
 				: this.historyService.moveHistory[this.historyService.moveHistory.length - 1];
 
-		console.log("turn:", turn)
+		console.log("turn:", turn);
+		console.log("currentPlayer:", this.currentPlayer);
 		if (this.currentPlayer === "w") {
 			turn.white = move;
 			turn.white.turnNum = turn.num;

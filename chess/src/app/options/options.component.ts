@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import { ChessOptions } from "../chess/options/options.model";
-import { MovesService } from "../chess/moves/moves.service";
 import { OptionsService } from "../chess/options/options.service";
 import { BoardService } from "../chess/board/board.service";
 
