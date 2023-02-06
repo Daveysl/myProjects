@@ -126,7 +126,6 @@ export class BoardService {
 			moveable: false,
 		}
 	}
-
 	public validateFenValue(fen: string): boolean {
 		let flag = false;
 		/** Test Cases:

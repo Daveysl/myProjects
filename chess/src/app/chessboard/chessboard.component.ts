@@ -19,45 +19,6 @@ import { BoardService } from '../chess/board/board.service';
 })
 export class ChessboardComponent {
 
-	public DEFAULT_FEN: string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-	public DEFAULT_PIECESET: string = "cburnett";
-	public DEFAULT_DISPLAY: string = "Piece Set";
-	public DEFAULT_THEMES: string[] = [
-		"theme1",
-		"theme2",
-		"alpha",
-		"california",
-		"cardinal",
-		"cburnett",
-		"chess7",
-		"chessnut",
-		"companion",
-		"dubrovny",
-		"fantasy",
-		"fresca",
-		"gioco",
-		"governor",
-		"horsey",
-		"icpieces",
-		"kosal",
-		"leipzig",
-		"letter",
-		"libra",
-		"maestro",
-		"merida",
-		"pirouetti",
-		"pixel",
-		"reillycraig",
-		"riohacha",
-		"shapes",
-		"spatial",
-		"staunty",
-		"tatiana",
-	];
-
-	// //  object for options
-	// public options: ChessOptions;
-
 	// list of coordinate letters
 	public LETTERS: string[];
 	// recorded mouse location (currently unused)
@@ -83,7 +44,7 @@ export class ChessboardComponent {
 		this.optionsService.setDefaults();
 		this.board = this.boardService.board;
 		this.LETTERS = this.moveService.letters;
-		this.step = moveService.step;
+		this.step = this.moveService.step;
 	}
 
 	// Main Methods
@@ -98,10 +59,10 @@ export class ChessboardComponent {
 	private selectLocation(location: Tile): void {
 		if (location.key !== this.moveService.storedTile.piece.key && location.piece.player !== this.moveService.storedTile.piece.player) {
 			if (this.validateMove(location, false)) {
-				console.log("move is valid");
+				// console.log("move is valid");
 				this.movePiece(location, 1);
 			} else {
-				console.log("This is not a valid move");
+				// console.log("This is not a valid move");
 				this.moveService.storedTile.piece = this.pieceService.createNullPiece(null);
 				this.step = "piece";
 			}
@@ -129,6 +90,7 @@ export class ChessboardComponent {
 		}
 		let move = this.moveService.createMove(this.board[piece.key], location, capturing);
 
+
 		// change location's piece to selected piece
 		this.board[location.key].piece = piece;
 		// change selected piece's tile to empty
@@ -137,6 +99,7 @@ export class ChessboardComponent {
 		);
 		// settle the piece into its new location
 		location.piece.key = location.key;
+
 
 		// record move
 		this.boardService.updateFenValue();
@@ -147,7 +110,7 @@ export class ChessboardComponent {
 		move.fenState = this.boardService.fenValue;
 		move.notation = this.createNotation(move);
 		move.current = true;
-		this.setTurn(move);
+		this.moveService.setTurn(move);
 
 		// Clearup Loop ----------------------------------------------
 		this.board.forEach((tile) => {
@@ -157,6 +120,7 @@ export class ChessboardComponent {
 		// erase the piece from storage
 		this.moveService.storedTile.piece = this.pieceService.createNullPiece(null);
 		if (code !== 2) {
+			console.log("currentPlayer:", this.currentPlayer)
 			this.currentPlayer = this.currentPlayer == "w" ? "b" : "w";
 		}
 
@@ -547,24 +511,7 @@ export class ChessboardComponent {
 		}
 		return note;
 	}
-	private setTurn(move: Move): void {
-		// console.log("move: ", move.current)
-		let turn =
-			this.currentPlayer === "w"
-				? this.historyService.createNewTurn()
-				: this.historyService.moveHistory[this.historyService.moveHistory.length - 1];
-
-		if (this.currentPlayer === "w") {
-			turn.white = move;
-			turn.white.turnNum = turn.num;
-			this.historyService.moveHistory.push(turn);
-			// console.log(this.turnHistory);
-		} else {
-			turn.black = move;
-			turn.black.turnNum = turn.num;
-			// console.log(this.turnHistory);
-		}
-	}
+	
 
 	// Event Listeners
 	public pieceClicked(event: MouseEvent, key: number): void {
