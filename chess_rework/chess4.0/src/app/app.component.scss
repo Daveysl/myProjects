@@ -1,0 +1,27 @@
+@import "../styles.scss";
+
+.background {
+    background-color: $back1;
+    color: $text_color;
+    width:100vw;
+    height:100vh;
+    position: absolute;
+    z-index: -5;
+}
+
+h1 {
+    padding: $spacing1;
+    margin-bottom: $spacing1;
+    background-color: $back2;
+}
+
+footer {
+    color: $text_color;
+    background-color: $back2;
+    font-size: $text_size1;
+    width: 100%;
+    position: absolute;
+    bottom: 0px;
+    left:0px;
+    padding: 5px;
+}

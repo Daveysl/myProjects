@@ -1,4 +1,4 @@
-import { Piece } from "../pieces/piece.model";
+import { Piece } from "./piece.model";
 
 export interface Tile {
     key:           number;

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Piece } from "./piece.model"
+import { Tile } from '../models/tile.model';
+import { Piece } from "../models/piece.model"
 
 @Injectable({
 	providedIn: 'root'
@@ -126,5 +127,7 @@ export class PieceLogicService {
 		let piece = this.pieces.find((piece) => piece.abbr == char);
 		return piece;
 	}
+
+	
 
 }

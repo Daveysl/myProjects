@@ -1,50 +1,52 @@
 import { Component } from '@angular/core';
-import { Move, Turn, Castling } from "../chess/moves/moves.model"
-import { PieceLogicService } from '../chess/pieces/piece-logic.service';
-import { HistoryService } from '../chess/moves/history.service';
-import { MovesService } from '../chess/moves/moves.service';
-import { OptionsService } from '../chess/options/options.service';
-import { BoardService } from '../chess/board/board.service';
+import { Move, Turn } from "../models/moves.model"
+import { HistoryService } from '../services/history.service';
+import { MovesService } from '../services/moves.service';
+import { OptionsService } from '../services/options.service';
 
 @Component({
 	selector: 'app-move-history',
 	templateUrl: './move-history.component.html',
-	styleUrls: ['./move-history.component.scss'],
-	providers: [PieceLogicService]
+	styleUrls: ['./move-history.component.scss']
 })
 export class MoveHistoryComponent {
-	public moveHistory: Turn[];
+	public movesH: Turn[];
 
 	constructor(
 		private historyService: HistoryService,
 		private moveService: MovesService,
-		private optionsService: OptionsService,
-		private boardService: BoardService
+		private optionsService: OptionsService
 	) {
-		this.moveHistory = historyService.moveHistory;
+		this.initMoveHistory();
 	}
 	
-	// private methods
 	public getPast(move: Move) {
-		this.moveHistory.forEach((turn) => {
+		console.log("getPast");
+
+		this.historyService.moveHistory.forEach((turn) => {
 			turn.white.current = false;
 			turn.black.current = false;
 		});
 
 		// call board service for these
 		this.optionsService.options.fenValue = move.fenState;
-		this.boardService.importFenValue(move.fenState);
-	
+		this.moveService.importFenValue(move.fenState);
+
 		if (move.piece.player === "w") {
-			this.moveHistory[move.turnNum - 1].white.current = true;
+			this.historyService.moveHistory[move.turnNum - 1].white.current = true;
 			this.moveService.currentPlayer = "b";
-			this.moveHistory.splice(move.turnNum);
-			this.moveHistory[move.turnNum - 1].black = this.historyService.initMove();
+			this.historyService.moveHistory.splice(move.turnNum);
+			this.historyService.moveHistory[move.turnNum - 1].black = this.historyService.initMove();
 		} else {
-			this.moveHistory[move.turnNum - 1].black.current = true;
+			this.historyService.moveHistory[move.turnNum - 1].black.current = true;
 			this.moveService.currentPlayer = "w";
-			this.moveHistory.splice(move.turnNum);
+			this.historyService.moveHistory.splice(move.turnNum);
 		}
+	}
+
+	// private methods
+	private initMoveHistory() {
+		this.movesH = this.historyService.moveHistory;
 	}
 
 }
