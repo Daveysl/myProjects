@@ -19,9 +19,7 @@ $primary3: #a4c6ff;
 $success: #befd9dff;
 $error: #f89496ff;
 
-// $tile_light: #f0d9b5;
 $tile_light: #b8b5b1;
-// $tile_dark: #b58863;
 $tile_dark: #746e66;
 $tile_dark_shadow: #413d38c2;
 
@@ -40,6 +38,7 @@ html, body {
 }
 
 h1 {
+	color: $text_1;
 	font-size: $heading_1;
 	padding: $spacing_2;
 	margin: 0;
@@ -61,10 +60,7 @@ button {
 	}
 }
 
-* {
-	font-family: "Open Sans", sans-serif;
-	box-sizing: border-box;
-}
+
 
 
 
