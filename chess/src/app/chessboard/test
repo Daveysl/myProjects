@@ -363,6 +363,7 @@ export class ChessComponent {
 		}
 	}
 	
+
 	// Main Methods
 	private selectTile(tile: Tile): void {
 		if (this.currentPlayer === tile.piece.player) {

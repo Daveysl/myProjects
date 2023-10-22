@@ -1,5 +1,5 @@
 
-import { Piece } from "./piece.model";
+import { Piece } from "../pieces/piece.model";
 
 export interface Move {
     turnNum:   number;

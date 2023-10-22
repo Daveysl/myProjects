@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BoardService } from './board.service';
-import { HistoryService } from './history.service';
-import {Turn } from '../models/moves.model';
-import { MovesService } from './moves.service';
-import { ChessOptions } from "../models/options.model";
+import { BoardService } from '../board/board.service';
+import { Tile } from '../board/tile.model';
+import { MovesService } from '../moves/moves.service';
+import { ChessOptions } from "../options/options.model";
 
 @Injectable({
   providedIn: 'root'
@@ -48,15 +47,12 @@ export class OptionsService {
     "staunty",
     "tatiana",
   ];
-  public moveHistory: Turn[];
 
   constructor(
     private movesService: MovesService,
     private boardService: BoardService,
-    private historyService: HistoryService,
   ) { 
     this.setDefaults();
-    this.moveHistory = this.historyService.moveHistory;
   }
 
   public get options() : ChessOptions {
@@ -73,8 +69,6 @@ export class OptionsService {
       this.movesService.storedTile = this.boardService.createEmptyTile(null);
       this.movesService.currentPlayer = "w";
       this.movesService.step = "piece";
-
-      this.historyService.clearHistory();
   
       // Objects
       this.boardService.castling = {
@@ -83,7 +77,7 @@ export class OptionsService {
         blong: true,
         bshort: true,
       };
-      this.movesService.importFenValue(this.DEFAULT_FEN);
+      this.boardService.importFenValue(this.DEFAULT_FEN);
     
     this.options = {
       pieceSet: this.DEFAULT_PIECESET,

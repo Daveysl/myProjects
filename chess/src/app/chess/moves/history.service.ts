@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Move, Turn } from "../models/moves.model"
-import { PieceLogicService } from './piece-logic.service';
+import { BoardService } from '../board/board.service';
+import { Move, Turn } from "../moves/moves.model"
+import { OptionsService } from '../options/options.service';
+import { PieceLogicService } from '../pieces/piece-logic.service';
+import { MovesService } from './moves.service';
 
 @Injectable({
 	providedIn: 'root'
@@ -11,19 +14,15 @@ export class HistoryService {
 	constructor(
 		private piecesService: PieceLogicService
 		) {
-			this._moveHistory = [];
+		this._moveHistory = [];
 	}
 
 	get moveHistory(): Turn[] {
 		return this._moveHistory;
 	}
+
 	public set moveHistory(value: Turn[]) {
 		this._moveHistory = value;
-	}
-
-	// 
-	public clearHistory(): void {
-		this.moveHistory = [];
 	}
 
 	public createNewTurn(): Turn {
@@ -34,6 +33,7 @@ export class HistoryService {
 			black: this.initMove(),
 		};
 	}
+
 	public initMove(): Move {
 		console.log("initMove")
 		return {

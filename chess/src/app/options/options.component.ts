@@ -1,9 +1,7 @@
 import { Component } from "@angular/core";
-import { ChessOptions } from "../models/options.model";
-import { OptionsService } from "../services/options.service";
-import { BoardService } from "../services/board.service";
-import { HistoryService } from "../services/history.service";
-import { Turn } from "../models/moves.model";
+import { ChessOptions } from "../chess/options/options.model";
+import { OptionsService } from "../chess/options/options.service";
+import { BoardService } from "../chess/board/board.service";
 
 @Component({
   selector: "app-options",
@@ -13,14 +11,11 @@ import { Turn } from "../models/moves.model";
 export class OptionsComponent {
   public OPTIONS_LIST: string[] = ["Piece Set", "FEN"];
   public options: ChessOptions;
-  public movesHistory: Turn[];
   constructor(
     private optionsService: OptionsService,
-    private boardService: BoardService,
-    private historyService: HistoryService
+    private boardService: BoardService
   ) {
     this.options = optionsService.options;
-    this.movesHistory = this.historyService.moveHistory;
   }
 
   public onFenValueChange(value: string): void {

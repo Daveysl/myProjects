@@ -14,11 +14,6 @@ import { DragDropModule } from "@angular/cdk/drag-drop";
 import { ChessboardComponent } from './chessboard/chessboard.component';
 import { MoveHistoryComponent } from './move-history/move-history.component';
 import { OptionsComponent } from './options/options.component';
-import { MovesService } from "./services/moves.service";
-import { HistoryService } from "./services/history.service";
-import { BoardService } from "./services/board.service";
-import { PieceLogicService } from "./services/piece-logic.service";
-import { OptionsService } from "./services/options.service";
 
 
 @NgModule({
@@ -35,7 +30,7 @@ import { OptionsService } from "./services/options.service";
     FormsModule,
     MatListModule,
   ],
-  providers: [MovesService, HistoryService, BoardService, PieceLogicService, OptionsService],
+  providers: [],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
