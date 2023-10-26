@@ -1,9 +1,6 @@
 BUGS
-- when piece is clicked, it highlights moves. When the same piece is clicked again, the highlights should disappear. When it is clicked a third time, the moves should highlight again.
-
 
 FEATURES
-- simplify board creation 
 
 finding possible moves:
 
@@ -15,25 +12,7 @@ if Tile location from moveLogic is valid, add the location to the Piece array of
 when a TILE is selected, go through the array of validMoves and highlight each Tile location on the Board
 
 
-CURRENT LOGIC:
---- Select Piece
-pieceClicked(key) {
-    tile = board.find(key),
-}
-selectTile(tile) {
-    storedTile.piece = tile.piec
-    select tile, 
-    change step to location
-    displayMoveableTiles()
-}
-
---- Select Location
-pieceClicked(key) {
-    tile = board.find(key),
-}
-
-
-
+- When king is able to be attacked, make the king red during the opposite player's turn?
 
 
 

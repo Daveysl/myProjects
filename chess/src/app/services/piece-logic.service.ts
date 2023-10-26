@@ -9,7 +9,7 @@ export class PieceLogicService {
 	// List of each chess piece
 	// first space (0) used for blank or null space
 	private _pieces: Piece[];
-	constructor() {
+	constructor () {
 		this._pieces = [
 			{
 				key: null, // ID of tile
@@ -102,7 +102,7 @@ export class PieceLogicService {
 				value: 12,
 				player: "b",
 			},
-		]
+		];
 	}
 
 	public createNullPiece(key: number) {
@@ -114,7 +114,6 @@ export class PieceLogicService {
 			player: "", // name of player
 		};
 	}
-
 	// Gets and Sets
 	public get pieces(): Piece[] {
 		return this._pieces;
@@ -128,6 +127,12 @@ export class PieceLogicService {
 		return piece;
 	}
 
-	
+	// public methods -----------------------------------------------------------------------
+	public getValidMoves(pastloc: Tile, newloc: Tile) {
+		// 1. get the piece name
+		// 2. 
+	}
+
+
 
 }

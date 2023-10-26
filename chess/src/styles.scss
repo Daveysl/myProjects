@@ -33,8 +33,13 @@ $spacing_1: 20px;
 $spacing_2: 10px;
 // -----------------------------------------
 
+* {
+	box-sizing: border-box;
+}
+
 html, body {
     margin: 0;
+	font-family: 'Open Sans', sans-serif;
 }
 
 h1 {

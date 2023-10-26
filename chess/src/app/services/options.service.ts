@@ -1,19 +1,17 @@
 import { Injectable } from '@angular/core';
 import { BoardService } from './board.service';
 import { HistoryService } from './history.service';
-import {Turn } from '../models/moves.model';
+import { Turn } from '../models/moves.model';
 import { MovesService } from './moves.service';
 import { ChessOptions } from "../models/options.model";
+import { GameService } from './game.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OptionsService {
 
-  private _options: ChessOptions;
-
-  public DEFAULT_FEN: string =
-    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+  public DEFAULT_FEN: string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
   public DEFAULT_PIECESET: string = "cburnett";
   public DEFAULT_DISPLAY: string = "Piece Set";
   public DEFAULT_THEMES: string[] = [
@@ -48,49 +46,39 @@ export class OptionsService {
     "staunty",
     "tatiana",
   ];
+
+  private _pieceSet: string;
+  private _pieceSetList: string[];
+  private _display: string;
+
+  // -------------------------------------------------- 
   public moveHistory: Turn[];
 
-  constructor(
-    private movesService: MovesService,
-    private boardService: BoardService,
+
+  constructor (
     private historyService: HistoryService,
-  ) { 
-    this.setDefaults();
+  ) {
     this.moveHistory = this.historyService.moveHistory;
-  }
-
-  public get options() : ChessOptions {
-    return this._options;
-  }
-  
-  public set options(value : ChessOptions) {
-    this._options = value;
+    this.setOptionsDefaults();
   }
 
 
-  public setDefaults(): void {
-      // Variables
-      this.movesService.storedTile = this.boardService.createEmptyTile(null);
-      this.movesService.currentPlayer = "w";
-      this.movesService.step = "piece";
+  public get pieceSet(): string { return this._pieceSet; }
+  public set pieceSet(v: string) { this._pieceSet = v; }
 
-      this.historyService.clearHistory();
-  
-      // Objects
-      this.boardService.castling = {
-        wlong: true,
-        wshort: true,
-        blong: true,
-        bshort: true,
-      };
-      this.movesService.importFenValue(this.DEFAULT_FEN);
-    
-    this.options = {
-      pieceSet: this.DEFAULT_PIECESET,
-      pieceSetList: this.DEFAULT_THEMES,
-      fenValue: this.DEFAULT_FEN,
-      display: this.DEFAULT_DISPLAY,
-    };
+  public get pieceSetList(): string[] { return this._pieceSetList; }
+  public set pieceSetList(v: string[]) { this._pieceSetList = v; }
+
+  public get display(): string { return this._display; }
+  public set display(v: string) { this._display = v; }
+
+
+
+
+  public setOptionsDefaults(): void {
+    this.pieceSet = this.DEFAULT_PIECESET;
+    this.pieceSetList = this.DEFAULT_THEMES;
+    this.display = this.DEFAULT_DISPLAY;
   }
 
 }

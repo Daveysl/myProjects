@@ -1,44 +1,22 @@
 <div class="board_container">
   <section id="chess">
     <div class="board" cdkDropListGroup>
-      <div
-        class="tile"
-        *ngFor="let tile of board"
-        [ngClass]="{
+      <div class="tile" *ngFor="let tile of board" [ngClass]="{
           tile__darkMovable: tile.color && tile.moveable,
           tile__dark: tile.color,
           tile__moveable: tile.moveable
-        }"
-        (mousedown)="pieceClicked($event, tile.key)"
-        cdkDropList
-        cdkDropListSortingDisabled
-        (cdkDropListDropped)="pieceDropped(tile)"
-        [cdkDropListData]="tile"
-      >
+        }" (mousedown)="pieceClicked($event, tile)" cdkDropList cdkDropListSortingDisabled
+        (cdkDropListDropped)="pieceDropped(tile)" [cdkDropListData]="tile">
         <!-- <div [ngClass]="{ moveable: tile.moveable }"></div> -->
 
         <!-- piece -->
-        <div
-          class="piece_placeholder"
-          *ngIf="tile.piece.value !== 0"
-          (cdkDragStarted)="piecePickedUp($event, tile)"
-          [cdkDragData]="tile"
-          [cdkDragConstrainPosition]="dragMouse"
-          cdkDrag
-        >
+        <div class="piece_placeholder" *ngIf="tile.piece.value !== 0" (cdkDragStarted)="piecePickedUp($event, tile)"
+          [cdkDragData]="tile" [cdkDragConstrainPosition]="dragMouse" cdkDrag>
           <!-- [cdkDragDisabled]="tile.piece.player !== currentPlayer" -->
           <span *cdkDragPlaceholder style="display: none"></span>
-          <img
-            class="piece"
-            [ngClass]="{ selected: tile.selected }"
-            
-            src="../../assets/{{ this.options.pieceSet }}/{{
+          <img class="piece" [ngClass]="{ selected: tile.selected }" src="../../assets/{{ this.pieceSet }}/{{
               tile.piece.player + tile.piece.abbr.toUpperCase()
-            }}.svg"
-
-            alt="{{ tile.piece.player + tile.piece.abbr.toUpperCase() }}"
-            draggable="false"
-          />
+            }}.svg" alt="{{ tile.piece.player + tile.piece.abbr.toUpperCase() }}" draggable="false" />
         </div>
       </div>
     </div>

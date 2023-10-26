@@ -27,7 +27,7 @@ export class HistoryService {
 	}
 
 	public createNewTurn(): Turn {
-		console.log("createNewTurn")
+		// console.log("createNewTurn")
 		return {
 			num: this.moveHistory.length + 1,
 			white: this.initMove(),
@@ -35,7 +35,7 @@ export class HistoryService {
 		};
 	}
 	public initMove(): Move {
-		console.log("initMove")
+		// console.log("initMove")
 		return {
 			turnNum: 0,
 			piece: this.piecesService.createNullPiece(null),

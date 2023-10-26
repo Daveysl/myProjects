@@ -8,18 +8,15 @@
 	height: 500px;
 
 	h1 {
-		width: 100%;
 		background-color: $background_3;
 	}
 
 	ul {
-		width: 100%;
 		list-style-type: none;
 		margin: 0;
 		padding: 0;
 
 		& li {
-			width: 100%;
 			display: grid;
 			grid-template-columns: 30px calc(50% - 15px) calc(50% - 15px);
 			grid-auto-rows: 30px;

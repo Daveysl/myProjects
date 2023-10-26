@@ -1,7 +1,6 @@
 
 export interface ChessOptions {
-    pieceSet:     string;
+    pieceSet: string;
     pieceSetList: string[];
-    fenValue:     string;
-    display:      string;
+    display: string;
 }

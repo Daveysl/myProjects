@@ -3,7 +3,8 @@
         <h1>Chess Settings</h1>
         <div class="tabs">
             <button class="tab" [ngClass]="{ tab__active: options.display === option }"
-                *ngFor="let option of OPTIONS_LIST" [style.width.%]="100 / OPTIONS_LIST.length" (click)="openTab(option)">
+                *ngFor="let option of OPTIONS_LIST" [style.width.%]="100 / OPTIONS_LIST.length"
+                (click)="openTab(option)">
                 {{ option }}
             </button>
         </div>
@@ -21,20 +22,18 @@
             <form>
                 <fieldset class="exportFen" apperance="fill">
                     <label for="fen">FEN</label>
-                    <input class="fenInput" name="fen" #input [ngModel]="options.fenValue"
+                    <input class="fenInput" name="fen" #input [ngModel]="fenValue"
                         (keyup.enter)="onFenValueChange(input.value)" />
                 </fieldset>
             </form>
         </div>
-
     </section>
 
     <section id="controls">
         <h1>Controls</h1>
         <div class="controls">
             <button (click)="reset()">Reset</button>
-            <p>{{movesHistory}}</p>
+            <p>{{ movesHistory }}</p>
         </div>
     </section>
-
 </section>

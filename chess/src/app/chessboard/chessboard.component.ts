@@ -3,64 +3,68 @@ import { Tile } from "../models/tile.model"
 
 import { CdkDrag, DragRef, Point } from "@angular/cdk/drag-drop";
 import { MovesService } from '../services/moves.service';
-import { OptionsService } from '../services/options.service';
 import { ChessOptions } from '../models/options.model';
 import { BoardService } from '../services/board.service';
+import { GameService } from '../services/game.service';
+import { OptionsService } from '../services/options.service';
 
 @Component({
 	selector: 'app-chessboard',
 	templateUrl: './chessboard.component.html',
-	styleUrls: ['./chessboard.component.scss']
+	styleUrls: ['./chessboard.component.scss'],
+	providers: [GameService]
 })
 export class ChessboardComponent {
+	/**
+	 * ##### Chessboard component #####
+	 * - Initializes board state
+	 * - Detects user inputs
+	 * -- Piece clicked
+	 * -- Piece picked up
+	 * -- Piece dropped
+	 * - Initializes LETTERS 
+	 * - Initializes CURRENT_PLAYER
+	 * - Initializes OPTIONS
+	 */
 
 	// list of coordinate letters
 	public LETTERS: string[];
 	public options: ChessOptions;
 
-	// board initiated
+	// board init
 	public board: Tile[];
+	public pieceSet: string = this.optionsService.pieceSet;
 
-	public currentPlayer: string;
-
-	constructor(
-		private moveService: MovesService, 
-		private optionsService: OptionsService, 
+	constructor (
+		private gameService: GameService,
+		private optionsService: OptionsService,
 		private boardService: BoardService
-		) {
-		this.options = this.optionsService.options;
-		this.currentPlayer = this.moveService.currentPlayer;
+	) {
 		this.board = this.boardService.board;
-		this.LETTERS = this.moveService.letters;
+		this.LETTERS = this.boardService.letters;
 	}
 
 	// Event Listeners
-	public pieceClicked(event: MouseEvent, key: number): void {
-
-		// initialize the board
-		//  replace this with a new function for cleanup
-		let tile = this.board.find((tile) => tile.key === key);
+	public pieceClicked(event: MouseEvent, tile: Tile): void {
+		console.log("Tile clicked:", tile.x, tile.y);
+		console.log(this.gameService.turnStep)
 		this.board.forEach((tile) => {
 			tile.selected = false;
 			tile.moveable = false;
 		});
 
-		console.log("tile:", this.moveService.getLetter(tile.x) + (tile.y + 1));
-
-		switch (this.moveService.step) {
+		switch (this.gameService.turnStep) {
 			case "piece":
-				if (tile.piece.player === this.moveService.currentPlayer) {
-					this.moveService.selectTile(tile);
-				}
+				this.gameService.selectPiece(tile);
 				break;
 			case "location":
-				if (tile.piece.player !== this.moveService.currentPlayer) {
-					this.moveService.selectLocation(tile);
+				if (tile.piece.player !== this.gameService.currentPlayer) {
+					this.gameService.selectLocation(tile);
 				} else {
-					if (tile.piece.key !== this.moveService.storedTile.piece.key) {
-						this.moveService.selectTile(tile);
+					if (tile.piece.key !== this.gameService.savedTile.piece.key) {
+						this.gameService.selectPiece(tile);
 					} else {
-						this.moveService.step = "piece";
+						this.gameService.turnStep = "piece";
 					}
 				}
 				break;
@@ -70,16 +74,15 @@ export class ChessboardComponent {
 		}
 	}
 	public piecePickedUp(event: CdkDrag<Tile>, tile: Tile) {
-		console.log("piece picked up:", tile.piece.name, event);
-		this.moveService.selectTile(tile);
+		console.log(tile.key)
+
+		this.gameService.selectPiece(tile);
 	}
 	public pieceDropped(tile: Tile) {
-		if (this.moveService.storedTile.piece.player !== "" && this.moveService.storedTile.piece.player !== tile.piece.player) {
-			this.moveService.selectLocation(tile);
-		} else {
-			console.log("oops");
-		}
+		console.log(tile.key)
+		this.gameService.selectLocation(tile);
 	}
+
 	public dragMouse(point: Point, dragRef: DragRef) {
 		return point;
 	}

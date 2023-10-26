@@ -3,6 +3,7 @@ import { Move, Turn } from "../models/moves.model"
 import { HistoryService } from '../services/history.service';
 import { MovesService } from '../services/moves.service';
 import { OptionsService } from '../services/options.service';
+import { GameService } from '../services/game.service';
 
 @Component({
 	selector: 'app-move-history',
@@ -12,14 +13,14 @@ import { OptionsService } from '../services/options.service';
 export class MoveHistoryComponent {
 	public movesH: Turn[];
 
-	constructor(
+	constructor (
 		private historyService: HistoryService,
 		private moveService: MovesService,
-		private optionsService: OptionsService
+		private gameService: GameService
 	) {
 		this.initMoveHistory();
 	}
-	
+
 	public getPast(move: Move) {
 		console.log("getPast");
 
@@ -29,8 +30,8 @@ export class MoveHistoryComponent {
 		});
 
 		// call board service for these
-		this.optionsService.options.fenValue = move.fenState;
-		this.moveService.importFenValue(move.fenState);
+		// this.optionsService.options.fenValue = move.fenState;
+		this.gameService.importFenValue(move.fenState);
 
 		if (move.piece.player === "w") {
 			this.historyService.moveHistory[move.turnNum - 1].white.current = true;
