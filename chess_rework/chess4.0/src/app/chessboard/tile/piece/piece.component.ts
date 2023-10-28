@@ -7,14 +7,14 @@ import { Piece } from '../../../models/piece.model';
   styleUrls: ['./piece.component.scss']
 })
 export class PieceComponent {
+
   public pieceIcon: string = '';
   public pieceSet: string = "cburnett";
 
   @Input() piece: Piece = this.newPiece();
-  @Input() scale: string = '';
 
-  constructor() {}
- 
+  constructor () { }
+
   ngOnChanges() {
     this.pieceIcon = `assets/${this.pieceSet}/${this.piece.player}${this.piece.abbr.toUpperCase()}.svg`;
   }
@@ -25,7 +25,9 @@ export class PieceComponent {
       name: '',
       abbr: '',
       value: 0,
-      player: ''
+      player: '',
+      x: 0,
+      y: 0
     }
   }
 }

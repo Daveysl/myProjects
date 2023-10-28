@@ -8,7 +8,10 @@ import { ChessboardComponent } from './chessboard/chessboard.component';
 import { PieceComponent } from './chessboard/tile/piece/piece.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TileComponent } from './chessboard/tile/tile.component';
-import {DragDropModule} from '@angular/cdk/drag-drop';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MoveService } from './services/move.service';
+import { OptionsComponent } from './options/options.component';
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -16,15 +19,17 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
     AppComponent,
     ChessboardComponent,
     PieceComponent,
-    TileComponent
+    TileComponent,
+    OptionsComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    DragDropModule
+    DragDropModule,
+    FormsModule
   ],
-  providers: [],
+  providers: [MoveService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

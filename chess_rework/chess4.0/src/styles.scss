@@ -16,7 +16,7 @@ $text_color: #e9e9e9;
 $text_color2: #c0c0c0;
 // chess tile colors
 $tile__light: #a09e99;
-$tile_dark: #615a4c;
+$tile__dark: #615a4c;
 $tile_dark_shadow: #413d38c2;
 
 // SIZES
@@ -29,9 +29,10 @@ $heading2: 1.1em;
 $spacing1: 20px;
 $spacing2: 10px;
 
-html, body {
-    margin: 0;
-    padding: 0;
+html,
+body {
+	margin: 0;
+	padding: 0;
 }
 
 h1 {
@@ -52,6 +53,7 @@ button {
 	&:hover {
 		cursor: pointer;
 	}
+
 	&:active {
 		background-color: $primary1;
 	}
@@ -63,5 +65,12 @@ button {
 }
 
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: Roboto, "Helvetica Neue", sans-serif;
+}

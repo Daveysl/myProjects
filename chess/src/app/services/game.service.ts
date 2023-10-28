@@ -259,8 +259,7 @@ export class GameService {
             }
           }
         }
-      }
-        break;
+      } break;
       case "king": {
         data.moves.push([oldx + 1, oldy + 1, 0],
           [oldx - 1, oldy + 1, 0],
