@@ -1,17 +1,11 @@
 @import "../../styles.scss";
 
-$board_size: 500px;
-$tile_size: 12.5%;
-$coord_size: 20px;
-$coord_textsize: 12px;
-
 .board_container {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     width: $board_size + $coord_size;
     height: auto;
-    margin-left: 15vw;
 
     .board {
         width: $board_size;
@@ -29,12 +23,12 @@ $coord_textsize: 12px;
             align-items: center;
             justify-content: center;
             background-color: $tile__light;
-            box-shadow: inset 8px 8px 16px 8px rgba(255, 255, 255, 0.08);
+            box-shadow: inset 8px 8px 8px 8px rgba(255, 255, 255, 0.08);
             transition: all 0.1s;
 
             &__dark {
                 background-color: $tile__dark;
-                box-shadow: inset 3px 3px 8px 0px rgba(0, 0, 0, 0.08);
+                box-shadow: inset 3px 3px 8px 0px $tile_dark_shadow;
             }
 
             &__moveable {
@@ -44,7 +38,7 @@ $coord_textsize: 12px;
 
             &__darkMovable {
                 background-color: $primary2;
-                box-shadow: inset 2px 2px 3px 0px $primary0;
+                box-shadow: inset 3px 3px 8px 0px $tile_dark_shadow_highlighted;
                 transition: all 0.5s;
             }
 
@@ -96,9 +90,13 @@ $coord_textsize: 12px;
     }
 }
 
+.graveyard {
+    height: 32px;
+    width: 100%;
+}
+
 .cdk-drop-list-receiving {
     cursor: pointer;
-
 }
 
 .cdk-drop-list-dragging {

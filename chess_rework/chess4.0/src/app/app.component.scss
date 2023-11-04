@@ -3,25 +3,27 @@
 .background {
     background-color: $back1;
     color: $text_color;
-    width:100vw;
-    height:100vh;
+    width: 100vw;
+    height: 100vh;
     position: absolute;
     z-index: -5;
 }
 
-h1 {
-    padding: $spacing1;
-    margin-bottom: $spacing1;
+header {
+    padding: 12px 32px;
     background-color: $back2;
 }
 
+main {
+    padding: 0 32px;
+}
+
 footer {
-    color: $text_color;
-    background-color: $back2;
-    font-size: $text_size1;
+    padding: 0px 32px;
+    color: $text_color2;
+    font-size: $text2;
     width: 100%;
     position: absolute;
     bottom: 0px;
-    left:0px;
-    padding: 5px;
+    left: 0px;
 }

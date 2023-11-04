@@ -3,16 +3,18 @@
 
 
 #options {
-    display: flex;
+    display: grid;
+    max-width: $full_board_width;
 }
 
 #settings {
-    background-color: $background_2;
-    width: 500px;
+    background-color: $back2;
+    color: #fff;
 
     .tab {
         width: 100%;
-        background-color: $background_3;
+        background-color: $back2;
+        border-bottom: 2px solid $back3;
 
         &:hover {
             background-color: $primary0;
@@ -22,13 +24,19 @@
             background-color: $primary1;
         }
 
-        &__active {
-            background-color: $background_2;
+        &__selected {
+            background-color: $back3;
+            border-bottom: 2px solid $primary1;
         }
     }
 
     .tab_display {
         width: 100%;
+        padding: 16px;
+
+        input[type=text] {
+            width: 100%;
+        }
 
         .carosel {
             width: 100%;
@@ -40,11 +48,11 @@
                 width: 10px;
 
                 &-track {
-                    background-color: $background_3 !important;
+                    background-color: $back3 !important;
                 }
 
                 &-thumb {
-                    background-color: $background_5 !important;
+                    background-color: $back2 !important;
 
                     &:hover {
                         background-color: $primary0 !important;
@@ -58,8 +66,8 @@
 
             .theme {
                 display: block;
-                background-color: $background_4;
-                padding: 10px;
+                background-color: $back2;
+                padding: 4px;
                 margin: 0;
 
                 &__selected {
@@ -75,33 +83,12 @@
                 }
 
                 img {
-                    width: 60px;
-                    height: 60px;
+                    width: 48px;
+                    height: 48px;
                 }
             }
         }
-    }
 
-    .exportFen {
-        width: 100%;
-        border: none;
 
-        .fenInput {
-            width: 100%;
-        }
-    }
-}
-
-#controls {
-    background-color: $background_2;
-    width: 250px;
-    margin-left: $spacing_1;
-
-    .controls {
-        padding: $spacing_2;
-
-        button {
-            background-color: $background_4;
-        }
     }
 }

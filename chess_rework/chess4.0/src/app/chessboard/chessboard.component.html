@@ -1,17 +1,21 @@
-<section class="board_container">
+<section class="main_container">
 
-    <div class="board" cdkDropListGroup>
-        <app-tile *ngFor="let tile of board" [tile]="tile" cdkDropList cdkDropListSortingDisabled
-            (newBoardEvent)="updateBoard($event)" (cdkDropListDropped)="pieceDropped($event, tile)"
-            [cdkDropListData]="tile"
-            [ngClass]="{ tile__dark: tile.dark, tile__moveable: tile.moveable, tile__darkMovable: tile.moveable && tile.dark}"
-            class="tile"></app-tile>
-    </div>
+    <section class="graveyard white_pieces"></section>
+    <section class="board_container">
+        <div class="board" cdkDropListGroup>
+            <app-tile *ngFor="let tile of board" [tile]="tile" cdkDropList cdkDropListSortingDisabled
+                (cdkDropListDropped)="pieceDropped($event, tile)"
+                [cdkDropListData]="tile"
+                [ngClass]="{ tile__dark: tile.dark, tile__moveable: tile.moveable, tile__darkMovable: tile.moveable && tile.dark}"
+                class="tile"></app-tile>
+        </div>
+        <div class="coords__numbers">
+            <div class="number" *ngFor="let i of [8,7,6,5,4,3,2,1]">{{ i }}</div>
+        </div>
+        <div class="coords__letters">
+            <div class="letter" *ngFor="let letter of ['a','b','c','d','e','f','g','h']">{{ letter }}</div>
+        </div>
+    </section>
+    <section class="graveyard black_pieces"></section>
 
-    <div class="coords__numbers">
-        <div class="number" *ngFor="let i of [8,7,6,5,4,3,2,1]">{{ i }}</div>
-    </div>
-    <div class="coords__letters">
-        <div class="letter" *ngFor="let letter of ['a','b','c','d','e','f','g','h']">{{ letter }}</div>
-    </div>
 </section>

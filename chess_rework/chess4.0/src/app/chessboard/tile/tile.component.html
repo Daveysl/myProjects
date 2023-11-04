@@ -1,6 +1,6 @@
 <!-- <app-piece *ngIf="tile.piece.value!==0" [piece]="tile.piece" (cdkDragStarted)="piecePickedUp($event, tile)"
     [cdkDragData]="tile" cdkDrag class="piece">
 </app-piece> -->
-<app-piece *ngIf="tile.piece.value!==0" [piece]="tile.piece" (cdkDragStarted)="piecePickedUp($event, tile)"
+<app-piece *ngIf="tile.piece.fen!=='' " [piece]="tile.piece" (cdkDragStarted)="dragMouse; piecePickedUp($event, tile)"
     [cdkDragData]="tile" cdkDrag [cdkDragConstrainPosition]="dragMouse" class="piece">
 </app-piece>

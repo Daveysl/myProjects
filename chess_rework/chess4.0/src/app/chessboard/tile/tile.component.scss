@@ -7,30 +7,29 @@
     align-items: center;
     justify-content: center;
     scale: 1;
-
-    &.cdk-drag-preview {
-        // background-color: red;
-        position: absolute !important;
-        left: -31.25px !important;
-        top: -31.25px !important;
-    }
 }
 
-.piece_placeholder {
-    .piece {
-        width: 100%;
-        height: 100%;
-        filter: opacity(100%);
-        transition: all 0.2s;
-        user-select: none;
+// .piece_placeholder {
+//     .piece {
+//         width: 100%;
+//         height: 100%;
+//         filter: opacity(100%);
+//         transition: all 0.2s;
+//         user-select: none;
 
-        &.selected {
-            filter: opacity(50%);
-            transition: all 0.2s;
-        }
-    }
-}
+//         &.selected {
+//             filter: opacity(50%);
+//             transition: all 0.2s;
+//         }
+//     }
+// }
 
 .cdk-drag-placeholder {
     display: none;
+}
+
+
+.cdk-drag-preview {
+    height: 1px !important;
+    width: 1px !important;
 }

@@ -1,20 +1,24 @@
-import { Component } from "@angular/core";
+import { Component, EventEmitter, Output } from "@angular/core";
+import { Tile } from "../models/types.model";
+import { ChessService } from "../services/chess.service";
 
 @Component({
   selector: "app-options",
   templateUrl: "./options.component.html",
-  styleUrls: ["./options.component.scss"],
+  styleUrls: ["./options.component.scss"]
 })
 export class OptionsComponent {
-  public optionsList: string[] = ["Piece Set", "FEN"];
+
+  @Output() resetBoard = new EventEmitter<boolean>();
+
+  public optionsList: string[] = ["Settings", "Piece Set", "FEN"];
   public pieceSetList: string[] = ['cburnett']
   public fenValue: string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
   private _pieceSet: string = "cburnett";
-  private _openedTab: string = "Piece Set";
+  private _openedTab: string = "FEN";
+  public r: boolean = false;
 
-  constructor () {
-
-  }
+  constructor () {}
 
   public get pieceSet(): string { return this._pieceSet; }
   public set pieceSet(v: string) {
@@ -38,8 +42,9 @@ export class OptionsComponent {
   public changeSet(value: string): void {
     this.pieceSet = value;
   }
-  public reset(): void {
-    // this.setDefaults();
+  public resetGame(): void {
+    console.log("resetting");
+    this.r = !this.r;
+    this.resetBoard.emit(this.r)
   }
 }
-

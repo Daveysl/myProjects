@@ -1,8 +1,7 @@
 import { CdkDrag, CdkDragMove, CdkDragStart, DragRef, Point } from '@angular/cdk/drag-drop';
 import { Component, Input, Output, EventEmitter, SimpleChanges, OnChanges } from '@angular/core';
-import { Piece } from 'src/app/models/piece.model';
-import { Tile } from 'src/app/models/tile.model';
-import { MoveService } from 'src/app/services/move.service';
+import { Piece, Tile } from 'src/app/models/types.model';
+import { ChessService } from 'src/app/services/chess.service';
 
 @Component({
   selector: 'app-tile',
@@ -14,25 +13,20 @@ export class TileComponent {
   @Input()
   get tile(): Tile { return this._tile; }
   set tile(value: Tile) {
-    this._tile = (value) || this.newTile();
+    this._tile = value;
   }
-  private _tile: Tile = this.newTile();
+  private _tile: Tile;
 
-  @Output() newBoardEvent = new EventEmitter<Tile[]>();
+  constructor (private chess: ChessService) {
+    this._tile = chess.newTile()
+  }
 
-  constructor (private moveService: MoveService) { }
-  ngOnChanges(changes: SimpleChanges) { }
 
   public piecePickedUp(event: CdkDragStart<Tile>, tile: Tile) {
-    // console.log(tile.piece.name)
-    // console.log("source:", event.source.data)
-    // console.log("dropcontainer:", event.source.dropContainer.data)
-
-    console.log(tile.piece.name, "picked up from", tile.x, tile.y);
-    let newBoard = this.moveService.boardState;
+    let newBoard = this.chess.board;
     // TODO: instead of returning existingTiles
-
-    let existingTiles = this.moveService.existingTiles(tile);
+    let existingTiles = this.chess.existingTiles(tile);
+    console.log(this.chess.getMoveNotation(tile.x, tile.y))
 
     newBoard.forEach(
       (t) => {
@@ -41,28 +35,10 @@ export class TileComponent {
         }
       }
     )
-    this.newBoardEvent.emit(newBoard);
-    this.moveService.updateBoardState(newBoard);
+    this.chess.updateBoardState(newBoard);
   }
 
-  private newTile(): Tile {
-    return {
-      key: 0,
-      piece: {
-        key: 0,
-        name: '',
-        abbr: '',
-        value: 0,
-        player: '',
-        x: 0,
-        y: 0
-      },
-      x: 0,
-      y: 0,
-      dark: false,
-      moveable: false
-    }
+  public dragMouse(point: Point) {
+    return point;
   }
-
-  public dragMouse(point: Point, dragRef: DragRef) { return point; }
 }
