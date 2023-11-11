@@ -6,6 +6,8 @@ export interface Tile {
     piece: Piece;
     dark: boolean;
     moveable: boolean;
+    selected: boolean;
+    attacked: boolean;
 }
 
 export type Color = 'w' | 'b' | null;

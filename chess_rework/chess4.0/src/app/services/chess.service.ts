@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Tile, Piece, Color } from '../models/types.model';
+import { LogicService } from './logic.service';
 
 @Injectable({
   providedIn: 'root'
@@ -37,7 +38,11 @@ export class ChessService {
       fen: 'B',
       abbr: 'B',
       color: 'b',
-      moves: [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [-1, -1], [-2, -2], [-3, -3], [-4, -4], [-5, -5], [-6, -6], [-7, -7], [-1, 1], [-2, 2], [-3, 3], [-4, 4], [-5, 5], [-6, 6], [-7, 7], [1, -1], [2, -2], [3, -3], [4, -4], [5, -5], [6, -6], [7, -7]]
+      moves: [
+        [1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7],
+        [-1, -1], [-2, -2], [-3, -3], [-4, -4], [-5, -5], [-6, -6], [-7, -7],
+        [-1, 1], [-2, 2], [-3, 3], [-4, 4], [-5, 5], [-6, 6], [-7, 7],
+        [1, -1], [2, -2], [3, -3], [4, -4], [5, -5], [6, -6], [7, -7]]
     },
     {
       name: 'rook',
@@ -104,10 +109,10 @@ export class ChessService {
     },
 
   ]
+  public currentPlayer: Color = 'w';
+  public validMove: boolean = false;
 
-  constructor () {
-    this.board = this.createBoard();
-  }
+  constructor (private logic: LogicService) { }
 
   // -----------------------------------
   public newPiece(): Piece {
@@ -126,7 +131,9 @@ export class ChessService {
       x: x,
       y: y,
       dark: dark,
-      moveable: false
+      moveable: false,
+      selected: false,
+      attacked: false
     };
   }
   // -----------------------------------
@@ -167,45 +174,21 @@ export class ChessService {
   //   return possibleMoves;
   // }
 
-  public existingTiles(oldTile: Tile) {
+  public getValidTiles(oldTile: Tile): Tile[] {
+    let validTiles: Tile[] = this.logic.giveValidTiles(oldTile, this.board, this.currentPlayer);
 
-    let possibleMoves = oldTile.piece.moves;
-    let existingTiles: Tile[] = [];
-
-    possibleMoves.forEach(
-      (move) => {
-        let horizontal = move[0];
-        let vertical = move[1];
-        let moveAttempt = this.findTile(oldTile.x + horizontal, oldTile.y + vertical);
-
-        if (moveAttempt) {
-          existingTiles.push(moveAttempt);
-        }
-      }
-    );
-    return existingTiles;
+    return validTiles;
   }
 
   public validateMove(oldTile: Tile, newTile: Tile): boolean {
     let valid: boolean = false;
-    let tileList = this.existingTiles(oldTile)
 
-
-
-
-    if (tileList.includes(newTile)) {
-      valid = true;
-    }
-
-    return valid;
-  }
-
-  public movePiece(oldTile: Tile, newTile: Tile): void {
     if ((oldTile.key !== newTile.key)) {
       if (oldTile.piece.color !== newTile.piece.color) {
-        if (this.validateMove(oldTile, newTile)) {
-          newTile.piece = oldTile.piece;
-          oldTile.piece = this.newPiece()
+        let validTiles = this.logic.giveValidTiles(oldTile, this.board, this.currentPlayer);
+
+        if (validTiles.includes(newTile)) {
+          valid = true;
         } else {
           console.error('This is not a possible move');
         }
@@ -215,12 +198,24 @@ export class ChessService {
     } else {
       console.error('This is the same tile!');
     }
+
+    return valid;
+  }
+
+  public movePiece(oldTile: Tile, newTile: Tile): void {
+    this.validMove = false;
+    if (this.validateMove(oldTile, newTile)) {
+      newTile.piece = oldTile.piece;
+      oldTile.piece = this.newPiece()
+      this.currentPlayer = this.currentPlayer === 'w' ? 'b' : 'w';
+      this.validMove = true;
+    }
   }
 
 
   public findTile(x: number, y: number): Tile {
     let tile = this.board.find((tile) => tile.x == x && tile.y == y)
-    return tile? tile : this.newTile();
+    return tile ? tile : this.newTile();
   }
 
   public getMoveNotation(x: number, y: number) {
@@ -246,6 +241,7 @@ export class ChessService {
   public resetGame(): void {
     this.board = this.createBoard();
     this.updateBoardState(this.board);
+    this.currentPlayer = 'w';
   }
 
   private createBoard(): Tile[] {
@@ -259,17 +255,33 @@ export class ChessService {
       ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
       ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
     ];
+
+    let bString = "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr";
+    bString.split('/').forEach(
+      char => {
+        if (+char) {
+          for (let i = 0; i < +char; i++) {
+            console.log(this.findPiece(char));
+          }
+
+        } else {
+          char.split("").forEach((i) => {
+            console.log(this.findPiece(i))
+          });
+        }
+      });
+
     let newBoard: Tile[] = [];
     let tile: Tile;
     let darkTile: boolean = true;
     let key = 0;
 
-    brd.reverse().forEach(
+    brd.forEach(
       (row, y) => {
         darkTile = !darkTile;
         row.forEach(
           (col, x) => {
-            tile = this.newTile(key, x + 1, y + 1, darkTile);
+            tile = this.newTile(key, x + 1, 8 - y, darkTile);
             tile.piece = this.findPiece(col)
 
             newBoard.push(tile);
@@ -277,9 +289,11 @@ export class ChessService {
             darkTile = !darkTile;
           }
         );
+        // console.log(row.toString(), 8 - y)
       }
     )
-    return newBoard.reverse();
+
+    return newBoard;
   }
 
   // private createBoard(): Tile[] {

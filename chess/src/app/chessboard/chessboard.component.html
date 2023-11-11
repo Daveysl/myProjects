@@ -10,7 +10,7 @@
         <!-- <div [ngClass]="{ moveable: tile.moveable }"></div> -->
 
         <!-- piece -->
-        <div class="piece_placeholder" *ngIf="tile.piece.value !== 0" (cdkDragStarted)="piecePickedUp($event, tile)"
+        <div class="piece_placeholder" *ngIf="tile.piece.value !== 0" (cdkDragStarted)="dragMouse; piecePickedUp($event, tile)"
           [cdkDragData]="tile" [cdkDragConstrainPosition]="dragMouse" cdkDrag>
           <!-- [cdkDragDisabled]="tile.piece.player !== currentPlayer" -->
           <span *cdkDragPlaceholder style="display: none"></span>
