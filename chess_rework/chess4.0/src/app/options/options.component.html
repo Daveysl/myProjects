@@ -1,0 +1,28 @@
+<section id="options">
+    <section id="settings">
+        <h1>Chess Settings</h1>
+        <div class="tabs">
+            <button class="tab" [ngClass]="{ tab__selected: openedTab === option }" *ngFor="let option of optionsList"
+                [style.width.%]="100 / optionsList.length" (click)="openTab(option)">
+                {{ option }}
+            </button>
+        </div>
+        <!-- TODO: Make each option div into a text string for a displayList -->
+        <div class="tab_display" *ngIf="openedTab === 'Settings'">
+            <button type="button" (click)="resetGame()">Reset board</button>
+        </div>
+        <div class="tab_display" *ngIf="openedTab === 'Piece Set'">
+            <div class="carosel">
+                <button class="theme" *ngFor="let theme of pieceSetList" (click)="changeTheme(theme)"
+                    [ngClass]="{ theme__selected: pieceSet === theme }">
+                    <img title="{{ theme }}" src="../../assets/{{ theme }}/wN.svg" alt="{{ theme }}" />
+                </button>
+            </div>
+        </div>
+        <div class="tab_display" *ngIf="openedTab === 'FEN'">
+            <label for="fen">FEN</label>
+            <input type="text" name="fen" id="fen" #input [ngModel]="fenValue"
+                (keyup.enter)="onFenValueChange(input.value)" />
+        </div>
+    </section>
+</section>

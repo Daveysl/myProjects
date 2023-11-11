@@ -1,0 +1,133 @@
+@import "../../styles.scss";
+
+.board_container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: $board_size + $coord_size;
+    height: auto;
+
+    .board {
+        width: $board_size;
+        height: $board_size;
+        display: flex;
+        flex-wrap: wrap;
+        box-shadow: 3px 3px 8px 2px rgba(0, 0, 0, 0.384);
+        z-index: 100;
+        cursor: pointer;
+        background-color: $tile__light;
+
+        .tile {
+            width: $tile_size;
+            height: $tile_size;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: $tile__light;
+            box-shadow: inset 8px 8px 8px 8px rgba(255, 255, 255, 0.08);
+            background-blend-mode: normal;
+
+            &__dark {
+                background-color: $tile__dark;
+                box-shadow: inset 3px 3px 8px 0px $tile_dark_shadow;
+            }
+
+            &__moveable {
+                background-color: $primary3;
+            }
+
+            &__darkMovable {
+                background-color: $primary2;
+                box-shadow: inset 3px 3px 8px 0px $tile_dark_shadow_highlighted;
+                
+            }
+
+            & .piece {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                scale: 1;
+                width: 100%;
+                height: 100%;
+
+                & .pieceImage {
+                    display: block;
+                    height: 60px;
+                }
+            }
+        }
+    }
+}
+
+.ghost {
+    background-image: none;
+    background-size: 100% 100%;
+    opacity: 0.3;
+    background-blend-mode: hard-light;
+    background-repeat: no-repeat!important;
+    background-position: center;
+}
+
+
+.cdk-drag-placeholder {
+    display: none !important;
+}
+
+.coords {
+    position: relative;
+    z-index: -2;
+
+    &__numbers {
+        height: $board_size;
+        background-color: $back1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        div {
+            padding: 5px;
+            height: $tile_size;
+            width: $coord_size;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: $text_color2;
+            font-size: $coord_textsize;
+        }
+    }
+
+    &__letters {
+        width: $board_size;
+        background-color: $back1;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        div {
+            width: $tile_size;
+            height: $coord_size;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: $text_color2;
+            font-size: $coord_textsize;
+        }
+
+    }
+}
+
+.graveyard {
+    height: 32px;
+    width: 100%;
+}
+
+.cdk-drop-list-receiving {
+    cursor: pointer;
+}
+
+.tile__moveable.cdk-drop-list-dragging {
+    cursor: pointer;
+    background-color: $primary0!important;
+    background-blend-mode: overlay;
+}

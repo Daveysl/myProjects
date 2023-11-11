@@ -1,0 +1,10 @@
+<div class="background"></div>
+
+<header id="app_title">Chess Rework</header>
+
+<main>
+    <app-chessboard [reset]="doit"></app-chessboard>
+    <app-options (resetBoard)="doReset($event)"></app-options>
+</main>
+
+<footer>Made by Sam @ Feb 7, 2023</footer>

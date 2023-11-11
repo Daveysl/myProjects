@@ -1,1 +1,71 @@
 /* You can add global styles to this file, and also import other style files */
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap");
+
+// COLORS ----------------------------------
+$background_1: rgb(18, 19, 22);
+$background_2: rgb(43, 45, 47);
+$background_3: rgb(50, 50, 54);
+$background_4: rgb(56, 58, 60);
+$background_5: rgb(73, 75, 77);
+
+$text_1: #f0f0f0;
+$text_2: #f0f0f0cb;
+
+$primary0: #1648adce;
+$primary1: #2f70e0;
+$primary2: #6099fc;
+$primary3: #a4c6ff;
+
+$success: #befd9dff;
+$error: #f89496ff;
+
+$tile_light: #b8b5b1;
+$tile_dark: #746e66;
+$tile_dark_shadow: #413d38c2;
+
+// SIZES
+$text_size_1: 0.3em;
+$heading_1: 1.1em;
+$heading_2: 1.1em;
+$default_board_size: 500px;
+
+$spacing_1: 20px;
+$spacing_2: 10px;
+// -----------------------------------------
+
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+	font-family: 'Open Sans', sans-serif;
+}
+
+h1 {
+	color: $text_1;
+	font-size: $heading_1;
+	padding: $spacing_2;
+	margin: 0;
+	font-weight: 700;
+}
+
+button {
+	border: none;
+	padding: 5px;
+	margin: 0;
+	color: $text_1;
+	background-color: $background_3;
+
+	&:hover {
+		cursor: pointer;
+	}
+	&:active {
+		background-color: $primary1;
+	}
+}
+
+
+
+
+

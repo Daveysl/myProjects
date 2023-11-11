@@ -1,0 +1,26 @@
+
+Get array of valid moves
+-- given original tile: oldTile
+-- tile to move: newTile
+-- name of piece on original tile: oldTile.piece
+
+x x x x x x x x 8
+x x x x x x x x 7
+x x x d x x x x 6
+x x a s a x x x 5
+x x x P x x x x 4
+x x x x x x x x 3
+x x x x x x x x 2
+x x x x x x x x 1
+a b c d e f g h 
+
+oldTile = d, 4
+single move = d, (4 + 1) = d5
+double move = d, (4 + 2) = d6
+attack move = (d - 1), (4 + 1) && (d + 1), (4 + 1) = c5 && e5 
+
+given board state:
+- oldTile.x, oldTile.y+1 = single move 
+- oldTile.x, oldTile.y+2 = double move
+- oldTile.x-1, oldTile.y+1 = attack move 
+- oldTile.x+1, oldTile.y+1 = attack move 

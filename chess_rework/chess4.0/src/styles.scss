@@ -1,0 +1,98 @@
+/* You can add global styles to this file, and also import other style files */
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap");
+
+// background
+$back1: rgb(24, 24, 24);
+$back2: rgba(32, 32, 32);
+$back3: rgba(40, 40, 40);
+$back4: rgb(48, 48, 48);
+// foreground and highlights
+$primary0: #2968e6ce;
+$primary1: #2861c5;
+$primary2: #6099fc;
+$primary3: #a4c6ff;
+// text color
+$text_color: #e9e9e9;
+$text_color2: #c0c0c0;
+// chess tile colors
+$tile__light: #a09e99;
+$tile__dark: #706e66;
+$tile_dark_shadow: #55514fd0;
+$tile_dark_shadow_highlighted: #0d388fd0;
+
+// SIZESs
+$text1: 16px;
+$text2: 14px;
+$h1: 20px;
+$h2: 16px;
+
+// chessboard sizing
+$board_size: 500px;
+$tile_size: 12.5%;
+$coord_size: 20px;
+$coord_textsize: 12px;
+$full_board_width: $board_size + $coord_size;
+
+// for margins, padding, filler boxes
+$spacing1: 4px;
+$spacing2: 8px;
+$spacing3: 16px;
+$spacing4: 24px;
+$spacing5: 32px;
+
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	color: $text_color;
+}
+
+h1 {
+	font-size: $h1;
+	padding: 8px 16px;
+	margin: 0;
+}
+
+h2 {
+	font-size: $h2;
+	padding: 8px 16px;
+	margin: 0;
+}
+
+button {
+	border: none;
+	padding: 8px;
+	margin: 0;
+	color: $text_color;
+	background-color: $back3;
+
+	&:hover {
+		cursor: pointer;
+	}
+
+	&:active {
+		background-color: $primary1;
+	}
+}
+
+* {
+	font-family: "Open Sans", sans-serif;
+	box-sizing: border-box;
+}
+
+.cdk-drag-preview {
+	width: 62.5px!important;
+	height: 62.5px!important;
+	overflow: visible;
+
+	.pieceImage {
+		width: 100%;
+		height: 100%;
+		opacity: 1;
+		position: fixed;
+		top: -31.25px!important;
+		left: -31.25px!important;
+	}
+}

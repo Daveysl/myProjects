@@ -1,0 +1,24 @@
+BUGS
+
+FEATURES
+
+finding possible moves:
+
+for each Tile on the Board.
+get the Tile Piece data
+given the moveLogic of the Piece go through each Tile on board.
+if Tile location from moveLogic is valid add the location to the Piece array of validMoves
+
+when a TILE is selected go through the array of validMoves and highlight each Tile location on the Board
+
+
+- When king is able to be attacked make the king red during the opposite player's turn?
+
+
+
+DEBUG
+////////////////////////////////////////
+
+
+"RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr"
+

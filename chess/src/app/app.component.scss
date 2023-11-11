@@ -1,0 +1,44 @@
+@import "../styles.scss";
+
+.background {
+	position: absolute;
+	z-index: -10;
+	width: 100%;
+	height: 100%;
+	background-color: $background_1;
+}
+
+#container {
+	// height: 100vh;
+	width: 1000px;
+	margin-left: 12vw;
+    padding: $spacing_1;
+	color: $text_1;
+	display: flex;
+	flex-flow: row wrap;
+	align-content: flex-start;
+	align-items: stretch;
+	overflow: auto;
+
+	&::-webkit-scrollbar {
+		width: 14px;
+		cursor: pointer;
+
+		&-track {
+			background-color: $background_3;
+			cursor: pointer;
+		}
+		&-corner {
+			background-color: $background_3;
+		}
+		&-thumb {
+			background-color: $background_5;
+			&:hover {
+				background-color: $primary0;
+			}
+			&:active {
+				background-color: $primary1;
+			}
+		}
+	}
+}

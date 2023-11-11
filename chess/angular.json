@@ -33,6 +33,14 @@
             "scripts": []
           },
           "configurations": {
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -43,7 +51,6 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
@@ -65,11 +72,15 @@
           }
         },
         "serve": {
+          "defaultConfiguration": "development",
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "chess:build"
           },
           "configurations": {
+            "development": {
+              "browserTarget": "chess:build:development"
+            },
             "production": {
               "browserTarget": "chess:build:production"
             }
@@ -98,19 +109,6 @@
             "scripts": []
           }
         },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "tsconfig.app.json",
-              "tsconfig.spec.json",
-              "e2e/tsconfig.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        },
         "e2e": {
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
@@ -125,5 +123,7 @@
         }
       }
     }},
-  "defaultProject": "chess"
+  "cli": {
+    "analytics": false
+  }
 }

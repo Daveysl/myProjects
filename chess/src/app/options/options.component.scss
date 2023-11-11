@@ -1,0 +1,101 @@
+@import "../../styles.scss";
+@import "../../app/app.component.scss";
+
+
+#options {
+    display: flex;
+}
+
+#settings {
+	background-color: $background_2;
+	width: 500px;
+	.tab {
+		width: 100%;
+		background-color: $background_3;
+
+		&:hover {
+			background-color: $primary0;
+		}
+
+		&:active {
+			background-color: $primary1;
+		}
+
+		&__active {
+			background-color: $background_2;
+		}
+	}
+
+	.tab_display {
+		width: 100%;
+
+		.carosel {
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			overflow-y: hidden;
+
+			&::-webkit-scrollbar {
+				width: 10px;
+				&-track {
+					background-color: $background_3!important;
+				}
+				&-thumb {
+					background-color: $background_5!important;
+					&:hover {
+						background-color: $primary0!important;
+					}
+					&:active {
+						background-color: $primary1!important;
+					}
+				}
+			}
+
+			.theme {
+				display: block;
+				background-color: $background_4;
+				padding: 10px;
+				margin: 0;
+
+				&__selected {
+					background-color: $primary1;
+				}
+
+				&:hover {
+					background-color: $primary0;
+				}
+
+				&:active {
+					background-color: $primary1;
+				}
+
+				img {
+					width: 60px;
+					height: 60px;
+				}
+			}
+		}
+	}
+
+	.exportFen {
+		width: 100%;
+		border: none;
+
+		.fenInput {
+			width: 100%;
+		}
+	}
+}
+
+#controls {
+	background-color: $background_2;
+	width: 250px;
+	margin-left: $spacing_1;
+	.controls {
+		padding: $spacing_2;
+
+		button {
+			background-color: $background_4;
+		}
+	}
+}
