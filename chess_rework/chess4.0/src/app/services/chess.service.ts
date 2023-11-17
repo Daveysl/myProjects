@@ -223,11 +223,11 @@ export class ChessService {
   }
 
   public getLetter(value: number) {
-    let letters = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+    let letters = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     return (letters[value]);
   }
 
-  public updateBoardState(value: Tile[]) {
+  public updateBoardState(value: Tile[]) { 
     this.board = value;
   }
 

@@ -15,19 +15,50 @@ export class OptionsComponent {
   public pieceSetList: string[] = ['cburnett']
   public fenValue: string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
   private _pieceSet: string = "cburnett";
+  private _themesList: string[] = [
+    "theme1",
+    "theme2",
+    "alpha",
+    "california",
+    "cardinal",
+    "cburnett",
+    "chess7",
+    "chessnut",
+    "companion",
+    "dubrovny",
+    "fantasy",
+    "fresca",
+    "gioco",
+    "governor",
+    "horsey",
+    "icpieces",
+    "kosal",
+    "leipzig",
+    "letter",
+    "libra",
+    "maestro",
+    "merida",
+    "pirouetti",
+    "pixel",
+    "reillycraig",
+    "riohacha",
+    "shapes",
+    "spatial",
+    "staunty",
+    "tatiana",
+  ];
   private _openedTab: string = "FEN";
   public r: boolean = false;
 
-  constructor () {}
+  constructor () { }
 
+  public get themesList(): string[] { return this._themesList; }
+  
   public get pieceSet(): string { return this._pieceSet; }
-  public set pieceSet(v: string) {
-    this._pieceSet = v;
-  }
+  public set pieceSet(v: string) { this._pieceSet = v; }
+
   public get openedTab(): string { return this._openedTab; }
-  public set openedTab(v: string) {
-    this._openedTab = v;
-  }
+  public set openedTab(v: string) { this._openedTab = v; }
 
   public onFenValueChange(value: string): void {
     this.fenValue = value;
